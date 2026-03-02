@@ -145,6 +145,7 @@ set(SOURCES
     src/ReceiveSubcommands-ForwardingHandlers.cc
     src/ReceiveSubcommands-MovementHandlers.cc
     src/ReceiveSubcommands-PlayerStateHandlers.cc
+    src/ReceiveSubcommands-QuestStateHandlers.cc
     src/ReceiveSubcommands-WorldStateHandlers.cc
     src/ReceiveSubcommands.cc
     src/ReplaySession.cc
