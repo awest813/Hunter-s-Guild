@@ -103,6 +103,16 @@ asio::awaitable<void> on_activate_timed_switch(shared_ptr<Client> c, SubcommandM
 asio::awaitable<void> on_battle_scores(shared_ptr<Client> c, SubcommandMessage& msg);
 asio::awaitable<void> on_dragon_actions_6x12(shared_ptr<Client> c, SubcommandMessage& msg);
 asio::awaitable<void> on_gol_dragon_actions(shared_ptr<Client> c, SubcommandMessage& msg);
+asio::awaitable<void> on_change_hp_6x2F(shared_ptr<Client> c, SubcommandMessage& msg);
+asio::awaitable<void> on_change_hp_6x4A_4B_4C(shared_ptr<Client> c, SubcommandMessage& msg);
+asio::awaitable<void> on_movement_6x20(shared_ptr<Client> c, SubcommandMessage& msg);
+asio::awaitable<void> on_movement_6x24(shared_ptr<Client> c, SubcommandMessage& msg);
+asio::awaitable<void> on_movement_6x3E(shared_ptr<Client> c, SubcommandMessage& msg);
+asio::awaitable<void> on_movement_6x3F(shared_ptr<Client> c, SubcommandMessage& msg);
+asio::awaitable<void> on_movement_6x40(shared_ptr<Client> c, SubcommandMessage& msg);
+asio::awaitable<void> on_movement_6x41_6x42(shared_ptr<Client> c, SubcommandMessage& msg);
+asio::awaitable<void> on_movement_6x55(shared_ptr<Client> c, SubcommandMessage& msg);
+asio::awaitable<void> on_movement_6x56(shared_ptr<Client> c, SubcommandMessage& msg);
 
 void forward_subcommand(shared_ptr<Client> c, SubcommandMessage& msg) {
   // If the command is an Ep3-only command, make sure an Ep3 client sent it
@@ -1522,22 +1532,6 @@ static asio::awaitable<void> on_word_select(shared_ptr<Client> c, SubcommandMess
   }
 }
 
-template <typename CmdT>
-static asio::awaitable<void> on_change_hp(shared_ptr<Client> c, SubcommandMessage& msg) {
-  const auto& cmd = msg.check_size_t<CmdT>(0xFFFF);
-
-  auto l = c->require_lobby();
-  if (!l->is_game() || (cmd.client_id != c->lobby_client_id)) {
-    co_return;
-  }
-
-  forward_subcommand(c, msg);
-  if ((l->check_flag(Lobby::Flag::CHEATS_ENABLED) || c->login->account->check_flag(Account::Flag::CHEAT_ANYWHERE)) &&
-      c->check_flag(Client::Flag::INFINITE_HP_ENABLED)) {
-    co_await send_change_player_hp(l, c->lobby_client_id, PlayerHPChange::MAXIMIZE_HP, 0);
-  }
-}
-
 static asio::awaitable<void> on_switch_state_changed(shared_ptr<Client> c, SubcommandMessage& msg) {
   auto& cmd = msg.check_size_t<G_WriteSwitchFlag_6x05>();
 
@@ -1613,56 +1607,6 @@ static asio::awaitable<void> on_switch_state_changed(shared_ptr<Client> c, Subco
 
   co_await forward_subcommand_with_entity_id_transcode_t<G_WriteSwitchFlag_6x05, true>(c, msg);
   co_return;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template <typename CmdT>
-static asio::awaitable<void> on_movement_xz(shared_ptr<Client> c, SubcommandMessage& msg) {
-  const auto& cmd = msg.check_size_t<CmdT>();
-  if (cmd.header.client_id != c->lobby_client_id) {
-    co_return;
-  }
-  c->pos.x = cmd.pos.x;
-  c->pos.z = cmd.pos.z;
-  forward_subcommand(c, msg);
-}
-
-template <typename CmdT>
-static asio::awaitable<void> on_movement_xyz(shared_ptr<Client> c, SubcommandMessage& msg) {
-  const auto& cmd = msg.check_size_t<CmdT>();
-  if (cmd.header.client_id != c->lobby_client_id) {
-    co_return;
-  }
-  c->pos = cmd.pos;
-  forward_subcommand(c, msg);
-}
-
-template <typename CmdT>
-static asio::awaitable<void> on_movement_xz_with_floor(shared_ptr<Client> c, SubcommandMessage& msg) {
-  const auto& cmd = msg.check_size_t<CmdT>();
-  if (cmd.header.client_id != c->lobby_client_id) {
-    co_return;
-  }
-  c->pos.x = cmd.pos.x;
-  c->pos.z = cmd.pos.z;
-  if (cmd.floor >= 0 && c->floor != static_cast<uint32_t>(cmd.floor)) {
-    c->floor = cmd.floor;
-  }
-  forward_subcommand(c, msg);
-}
-
-template <typename CmdT>
-static asio::awaitable<void> on_movement_xyz_with_floor(shared_ptr<Client> c, SubcommandMessage& msg) {
-  const auto& cmd = msg.check_size_t<CmdT>();
-  if (cmd.header.client_id != c->lobby_client_id) {
-    co_return;
-  }
-  c->pos = cmd.pos;
-  if (cmd.floor >= 0 && c->floor != static_cast<uint32_t>(cmd.floor)) {
-    c->floor = cmd.floor;
-  }
-  forward_subcommand(c, msg);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -4978,11 +4922,11 @@ const vector<SubcommandDefinition> subcommand_definitions{
     /* 6x1D */ {0x19, 0x1B, 0x1D, on_invalid},
     /* 6x1E */ {0x1A, 0x1C, 0x1E, on_invalid},
     /* 6x1F */ {0x1B, 0x1D, 0x1F, on_change_floor_6x1F},
-    /* 6x20 */ {0x1C, 0x1E, 0x20, on_movement_xyz_with_floor<G_SetPosition_6x20>},
+    /* 6x20 */ {0x1C, 0x1E, 0x20, on_movement_6x20},
     /* 6x21 */ {0x1D, 0x1F, 0x21, on_change_floor_6x21},
     /* 6x22 */ {0x1E, 0x20, 0x22, on_forward_check_client},
     /* 6x23 */ {0x1F, 0x21, 0x23, on_set_player_visible},
-    /* 6x24 */ {0x20, 0x22, 0x24, on_movement_xyz<G_TeleportPlayer_6x24>},
+    /* 6x24 */ {0x20, 0x22, 0x24, on_movement_6x24},
     /* 6x25 */ {0x21, 0x23, 0x25, on_equip_item},
     /* 6x26 */ {0x22, 0x24, 0x26, on_unequip_item}, // TODO: Why does BB allow this in the lobby?
     /* 6x27 */ {0x23, 0x25, 0x27, on_use_item},
@@ -4993,7 +4937,7 @@ const vector<SubcommandDefinition> subcommand_definitions{
     /* 6x2C */ {0x28, 0x2A, 0x2C, on_forward_check_client},
     /* 6x2D */ {0x29, 0x2B, 0x2D, on_forward_check_client},
     /* 6x2E */ {0x2A, 0x2C, 0x2E, on_forward_check_client},
-    /* 6x2F */ {0x2B, 0x2D, 0x2F, on_change_hp<G_ChangePlayerHP_6x2F>},
+    /* 6x2F */ {0x2B, 0x2D, 0x2F, on_change_hp_6x2F},
     /* 6x30 */ {0x2C, 0x2E, 0x30, on_level_up},
     /* 6x31 */ {0x2D, 0x2F, 0x31, on_forward_check_game},
     /* 6x32 */ {NONE, NONE, 0x32, on_forward_check_game},
@@ -5009,11 +4953,11 @@ const vector<SubcommandDefinition> subcommand_definitions{
     /* 6x3B */ {NONE, 0x38, 0x3B, forward_subcommand_m},
     /* 6x3C */ {0x34, 0x39, 0x3C, forward_subcommand_m},
     /* 6x3D */ {0x35, 0x3A, 0x3D, on_invalid},
-    /* 6x3E */ {NONE, NONE, 0x3E, on_movement_xyz_with_floor<G_StopAtPosition_6x3E>},
-    /* 6x3F */ {0x36, 0x3B, 0x3F, on_movement_xyz_with_floor<G_SetPosition_6x3F>},
-    /* 6x40 */ {0x37, 0x3C, 0x40, on_movement_xz<G_WalkToPosition_6x40>},
-    /* 6x41 */ {0x38, 0x3D, 0x41, on_movement_xz<G_MoveToPosition_6x41_6x42>},
-    /* 6x42 */ {0x39, 0x3E, 0x42, on_movement_xz<G_MoveToPosition_6x41_6x42>},
+    /* 6x3E */ {NONE, NONE, 0x3E, on_movement_6x3E},
+    /* 6x3F */ {0x36, 0x3B, 0x3F, on_movement_6x3F},
+    /* 6x40 */ {0x37, 0x3C, 0x40, on_movement_6x40},
+    /* 6x41 */ {0x38, 0x3D, 0x41, on_movement_6x41_6x42},
+    /* 6x42 */ {0x39, 0x3E, 0x42, on_movement_6x41_6x42},
     /* 6x43 */ {0x3A, 0x3F, 0x43, on_forward_check_game_client},
     /* 6x44 */ {0x3B, 0x40, 0x44, on_forward_check_game_client},
     /* 6x45 */ {0x3C, 0x41, 0x45, on_forward_check_game_client},
@@ -5021,9 +4965,9 @@ const vector<SubcommandDefinition> subcommand_definitions{
     /* 6x47 */ {0x3D, 0x43, 0x47, forward_subcommand_with_entity_targets_transcode_and_track_hits_t<G_CastTechnique_Header_6x47>},
     /* 6x48 */ {NONE, NONE, 0x48, on_cast_technique_finished},
     /* 6x49 */ {0x3E, 0x44, 0x49, forward_subcommand_with_entity_targets_transcode_and_track_hits_t<G_ExecutePhotonBlast_Header_6x49>},
-    /* 6x4A */ {0x3F, 0x45, 0x4A, on_change_hp<G_ClientIDHeader>},
-    /* 6x4B */ {0x40, 0x46, 0x4B, on_change_hp<G_ClientIDHeader>},
-    /* 6x4C */ {0x41, 0x47, 0x4C, on_change_hp<G_ClientIDHeader>},
+    /* 6x4A */ {0x3F, 0x45, 0x4A, on_change_hp_6x4A_4B_4C},
+    /* 6x4B */ {0x40, 0x46, 0x4B, on_change_hp_6x4A_4B_4C},
+    /* 6x4C */ {0x41, 0x47, 0x4C, on_change_hp_6x4A_4B_4C},
     /* 6x4D */ {0x42, 0x48, 0x4D, on_player_died},
     /* 6x4E */ {NONE, NONE, 0x4E, on_player_revivable},
     /* 6x4F */ {0x43, 0x49, 0x4F, on_player_revived},
@@ -5032,8 +4976,8 @@ const vector<SubcommandDefinition> subcommand_definitions{
     /* 6x52 */ {0x46, 0x4C, 0x52, on_set_animation_state},
     /* 6x53 */ {0x47, 0x4D, 0x53, on_forward_check_game},
     /* 6x54 */ {0x48, 0x4E, 0x54, forward_subcommand_m},
-    /* 6x55 */ {0x49, 0x4F, 0x55, on_movement_xyz<G_IntraMapWarp_6x55>},
-    /* 6x56 */ {0x4A, 0x50, 0x56, on_movement_xyz<G_SetPlayerPositionAndAngle_6x56>},
+    /* 6x55 */ {0x49, 0x4F, 0x55, on_movement_6x55},
+    /* 6x56 */ {0x4A, 0x50, 0x56, on_movement_6x56},
     /* 6x57 */ {NONE, 0x51, 0x57, on_forward_check_client},
     /* 6x58 */ {NONE, NONE, 0x58, on_forward_check_client},
     /* 6x59 */ {0x4B, 0x52, 0x59, on_pick_up_item},
