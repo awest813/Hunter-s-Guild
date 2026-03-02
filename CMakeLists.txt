@@ -120,6 +120,7 @@ set(SOURCES
     src/ReceiveCommands-QuestLoading.cc
     src/ReceiveCommands-ProfileHandlers.cc
     src/ReceiveCommands-PatchProgramHandlers.cc
+    src/ReceiveCommands-LoginHandlers.cc
     src/ReceiveCommands-LobbyMenuHandlers.cc
     src/ReceiveCommands-MainMenuHandlers.cc
     src/ReceiveCommands-QuestMenuHandlers.cc
