@@ -116,6 +116,7 @@ set(SOURCES
     src/QuestScript.cc
     src/RareItemSet.cc
     src/ReceiveCommands-GameCreation.cc
+    src/ReceiveCommands-CreateGameHandlers.cc
     src/ReceiveCommands-QuestLoading.cc
     src/ReceiveCommands.cc
     src/ReceiveSubcommands.cc
