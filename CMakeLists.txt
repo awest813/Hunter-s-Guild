@@ -142,6 +142,7 @@ set(SOURCES
     src/ReceiveSubcommands-BossHandlers.cc
     src/ReceiveSubcommands-CommunicationHandlers.cc
     src/ReceiveSubcommands-Ep3BBMenuHandlers.cc
+    src/ReceiveSubcommands-ExpAndMesetaHandlers.cc
     src/ReceiveSubcommands-ForwardingHandlers.cc
     src/ReceiveSubcommands-MovementHandlers.cc
     src/ReceiveSubcommands-PlayerStateHandlers.cc
