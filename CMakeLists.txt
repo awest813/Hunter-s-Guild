@@ -121,6 +121,7 @@ set(SOURCES
     src/ReceiveCommands-ProfileHandlers.cc
     src/ReceiveCommands-PatchProgramHandlers.cc
     src/ReceiveCommands-BBHandlers.cc
+    src/ReceiveCommands-BBFileHandlers.cc
     src/ReceiveCommands-LoginHandlers.cc
     src/ReceiveCommands-LobbyMenuHandlers.cc
     src/ReceiveCommands-MainMenuHandlers.cc
