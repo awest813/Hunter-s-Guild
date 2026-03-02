@@ -140,6 +140,7 @@ set(SOURCES
     src/ReceiveCommands-TournamentHandlers.cc
     src/ReceiveCommands.cc
     src/ReceiveSubcommands-PlayerStateHandlers.cc
+    src/ReceiveSubcommands-WorldStateHandlers.cc
     src/ReceiveSubcommands.cc
     src/ReplaySession.cc
     src/SaveFileFormats.cc
