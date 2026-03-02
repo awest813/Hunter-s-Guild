@@ -123,6 +123,7 @@ set(SOURCES
     src/ReceiveCommands-BBHandlers.cc
     src/ReceiveCommands-BBFileHandlers.cc
     src/ReceiveCommands-BBSaveHandlers.cc
+    src/ReceiveCommands-TradeHandlers.cc
     src/ReceiveCommands-LoginHandlers.cc
     src/ReceiveCommands-LobbyMenuHandlers.cc
     src/ReceiveCommands-MainMenuHandlers.cc
