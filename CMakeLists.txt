@@ -152,20 +152,23 @@ add_dependencies(newserv newserv-Revision-cc)
 enable_testing()
 
 file(GLOB LogTestCases ${CMAKE_SOURCE_DIR}/tests/*.test.txt)
-file(GLOB LogRDTestCases ${CMAKE_SOURCE_DIR}/tests/*.rdtest.txt)
+list(SORT LogTestCases)
 
 foreach(LogTestCase IN ITEMS ${LogTestCases})
+    get_filename_component(LogTestCaseName ${LogTestCase} NAME)
     add_test(
-        NAME ${LogTestCase}
+        NAME replay:${LogTestCaseName}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         COMMAND ${CMAKE_BINARY_DIR}/newserv --replay-log=${LogTestCase} --config=${CMAKE_SOURCE_DIR}/tests/config.json)
 endforeach()
 
 file(GLOB ScriptTestCases ${CMAKE_SOURCE_DIR}/tests/*.test.sh)
+list(SORT ScriptTestCases)
 
 foreach(ScriptTestCase IN ITEMS ${ScriptTestCases})
+    get_filename_component(ScriptTestCaseName ${ScriptTestCase} NAME)
     add_test(
-        NAME ${ScriptTestCase}
+        NAME script:${ScriptTestCaseName}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         COMMAND ${ScriptTestCase} ${CMAKE_BINARY_DIR}/newserv)
 endforeach()

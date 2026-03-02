@@ -14,6 +14,7 @@ See TODO.md for a list of known issues and future work I've curated, or go to th
     * [Other server projects](#other-server-projects)
     * [Using newserv in other projects](#using-newserv-in-other-projects)
     * [Contributing to newserv](#contributing-to-newserv)
+    * [Codebase architecture](#codebase-architecture)
 * [Compatibility](#compatibility)
 * Setup
     * [Server setup](#server-setup)
@@ -97,6 +98,10 @@ The goals of this project are:
 * Document the internals of PSO's network protocol, file formats, and game mechanics. This is mainly done through comments in the code.
 
 This is a personal project; there is no official development team, official website, or official instance of newserv. Issues and pull requests are certainly welcome, but please only add content (e.g. quests or patches) that you've created, is already public, or you have permission to release publicly.
+
+## Codebase architecture
+
+For a contributor-oriented architecture map (major modules, where to make specific kinds of changes, and high-risk files), see [docs/architecture.md](docs/architecture.md).
 
 # Compatibility
 

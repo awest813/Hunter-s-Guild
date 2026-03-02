@@ -6,16 +6,49 @@ on:
   pull_request:
     branches: [master]
 
-env:
-  BUILD_TYPE: Release
-
 jobs:
+  format:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install clang-format
+        run: sudo apt-get install -y clang-format
+
+      - name: Check formatting
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch origin "${{ github.base_ref }}" --depth=1
+            CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT "origin/${{ github.base_ref }}...HEAD" -- "*.cc" "*.hh")
+          else
+            CHANGED_FILES=$(git diff-tree --no-commit-id --name-only -r HEAD -- "*.cc" "*.hh")
+          fi
+
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No C++ files changed; skipping format check."
+            exit 0
+          fi
+
+          echo "Checking formatting for:"
+          echo "$CHANGED_FILES"
+          echo "$CHANGED_FILES" | xargs clang-format --dry-run --Werror
+
   build:
+    needs: format
     runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            build_type: Release
+          - os: ubuntu-latest
+            build_type: Debug
+          - os: macos-latest
+            build_type: Release
 
     steps:
       - uses: actions/checkout@v4
@@ -54,11 +87,11 @@ jobs:
           sudo make install
 
       - name: Configure CMake
-        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
 
       - name: Build
-        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} -j $(nproc)
+        run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} -j $(nproc)
 
       - name: Test
         working-directory: ${{github.workspace}}/build
-        run: ctest -C ${{env.BUILD_TYPE}} --output-on-failure
+        run: ctest -C ${{matrix.build_type}} --output-on-failure --test-output-size-failed 200000
