@@ -115,6 +115,7 @@ set(SOURCES
     src/QuestMetadata.cc
     src/QuestScript.cc
     src/RareItemSet.cc
+    src/ReceiveCommands-GameCreation.cc
     src/ReceiveCommands.cc
     src/ReceiveSubcommands.cc
     src/ReplaySession.cc
