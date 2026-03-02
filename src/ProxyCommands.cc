@@ -255,9 +255,18 @@ static asio::awaitable<HandlerResult> S_V123U_02_17(shared_ptr<Client> c, Channe
   // Respond with an appropriate login command. We don't let the client do this because it believes it already did
   // (when it was in an unlinked session, or in the patch server case, during the current session due to a hidden
   // redirect).
+  auto log_login_relay = [&](const char* relay_command) -> void {
+    c->log.info_f(
+        "triage-proxy-login-relay: init_command={:02X} version={} relay_command={} remote_guild_card_number={}",
+        msg.command,
+        phosg::name_for_enum(c->version()),
+        relay_command,
+        c->proxy_session->remote_guild_card_number);
+  };
   switch (c->version()) {
     case Version::PC_PATCH:
     case Version::BB_PATCH:
+      log_login_relay("02");
       c->proxy_session->server_channel->send(0x02);
       co_return HandlerResult::SUPPRESS;
 
@@ -268,9 +277,11 @@ static asio::awaitable<HandlerResult> S_V123U_02_17(shared_ptr<Client> c, Channe
     case Version::DC_11_2000:
     case Version::DC_V1:
       if (msg.command == 0x17) {
+        log_login_relay("90");
         send_90_to_server(c);
         co_return HandlerResult::SUPPRESS;
       } else {
+        log_login_relay("93");
         send_93_to_server(c);
         co_return HandlerResult::SUPPRESS;
       }
@@ -281,9 +292,11 @@ static asio::awaitable<HandlerResult> S_V123U_02_17(shared_ptr<Client> c, Channe
     case Version::PC_V2:
     case Version::GC_NTE: {
       if (msg.command == 0x17) {
+        log_login_relay("9A");
         send_9A_to_server(c);
         co_return HandlerResult::SUPPRESS;
       } else {
+        log_login_relay("9D");
         send_9D_to_server(c);
         co_return HandlerResult::SUPPRESS;
       }
@@ -294,15 +307,18 @@ static asio::awaitable<HandlerResult> S_V123U_02_17(shared_ptr<Client> c, Channe
     case Version::GC_EP3_NTE:
     case Version::GC_EP3:
       if (msg.command == 0x17) {
+        log_login_relay("DB");
         send_DB_to_server(c);
         co_return HandlerResult::SUPPRESS;
       } else {
         // For command 02, send the same as if we had received 9A from the server
+        log_login_relay("9E-via-S_G_9A");
         co_return co_await S_G_9A(c, msg);
       }
       throw logic_error("GC init command not handled");
 
     case Version::XB_V3: {
+      log_login_relay("9E");
       send_9E_XB_to_server(c);
       co_return HandlerResult::SUPPRESS;
     }

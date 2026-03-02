@@ -2922,6 +2922,7 @@ static asio::awaitable<void> on_entity_drop_item_request(shared_ptr<Client> c, S
   auto rec = reconcile_drop_request_with_map(c, cmd, l->difficulty, l->event, l->map_state, true);
 
   ServerDropMode drop_mode = l->drop_mode;
+  bool forced_server_shared_for_bb_leader = false;
   switch (drop_mode) {
     case ServerDropMode::DISABLED:
       co_return;
@@ -2932,6 +2933,7 @@ static asio::awaitable<void> on_entity_drop_item_request(shared_ptr<Client> c, S
       auto leader = l->clients[l->leader_id];
       if (leader && leader->version() == Version::BB_V4) {
         drop_mode = ServerDropMode::SERVER_SHARED;
+        forced_server_shared_for_bb_leader = true;
         break;
       } else {
         forward_subcommand(c, msg);
@@ -2944,6 +2946,15 @@ static asio::awaitable<void> on_entity_drop_item_request(shared_ptr<Client> c, S
       break;
     default:
       throw logic_error("invalid drop mode");
+  }
+  if (forced_server_shared_for_bb_leader) {
+    l->log.info_f(
+        "triage-drop-mode: requested={} effective={} reason=bb_leader floor={:02X} area={:02X} source_client={:X}",
+        phosg::name_for_enum(ServerDropMode::CLIENT),
+        phosg::name_for_enum(drop_mode),
+        cmd.floor,
+        cmd.effective_area,
+        c->lobby_client_id);
   }
 
   if (rec.should_drop) {

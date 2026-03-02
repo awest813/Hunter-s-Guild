@@ -277,6 +277,13 @@ static asio::awaitable<void> send_auto_patches_if_needed(shared_ptr<Client> c) {
 
 asio::awaitable<void> start_login_server_procedure(shared_ptr<Client> c) {
   auto s = c->require_server_state();
+  c->log.info_f(
+      "triage-login-procedure: version={} has_login={} in_proxy={} in_lobby={} pre_lobby_event={:02X}",
+      phosg::name_for_enum(c->version()),
+      !!c->login,
+      !!c->proxy_session,
+      !!c->lobby.lock(),
+      s->pre_lobby_event);
 
   if (c->lobby.lock()) {
     send_self_leave_notification(c);
@@ -413,6 +420,15 @@ asio::awaitable<void> start_proxy_session(shared_ptr<Client> c, const string& ho
   }
 
   auto s = c->require_server_state();
+  c->log.info_f(
+      "triage-proxy-session: phase=start version={} destination={}:{} use_persistent_config={} has_login={} can_chat_commands={} proxy_save_files_enabled={}",
+      phosg::name_for_enum(c->version()),
+      host,
+      port,
+      use_persistent_config,
+      !!c->login,
+      c->can_use_chat_commands(),
+      s->proxy_allow_save_files);
 
   // We don't send any preamble commands for BB clients since proxy sessions are created at connection time instead of
   // during the main session
@@ -476,6 +492,11 @@ asio::awaitable<void> start_proxy_session(shared_ptr<Client> c, const string& ho
         phosg::TerminalFormat::FG_YELLOW,
         phosg::TerminalFormat::FG_RED);
     c->proxy_session = make_shared<ProxySession>(channel, pc);
+    c->log.info_f(
+        "triage-proxy-session: phase=connected remote_channel=\"{}\" remote_guild_card_number={} remote_ip_crc_patch={}",
+        c->proxy_session->server_channel->name,
+        c->proxy_session->remote_guild_card_number,
+        c->proxy_session->enable_remote_ip_crc_patch);
 
     if (c->version() == Version::GC_EP3) {
       send_ep3_media_update(c, 4, 0, "");

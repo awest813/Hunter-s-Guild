@@ -1570,8 +1570,18 @@ void ServerState::load_bb_system_defaults() {
 }
 
 void ServerState::load_accounts() {
-  config_log.info_f("Indexing accounts");
+  size_t previous_count = this->account_index ? this->account_index->count() : 0;
+  size_t connected_clients = this->game_server ? this->game_server->all_clients().size() : 0;
+  config_log.info_f(
+      "triage-account-reload: phase=start allow_saving_accounts={} previous_accounts={} connected_clients={}",
+      this->allow_saving_accounts,
+      previous_count,
+      connected_clients);
   this->account_index = make_shared<AccountIndex>(!this->allow_saving_accounts);
+  config_log.info_f(
+      "triage-account-reload: phase=complete loaded_accounts={} connected_clients={}",
+      this->account_index->count(),
+      connected_clients);
 }
 
 void ServerState::load_teams() {
