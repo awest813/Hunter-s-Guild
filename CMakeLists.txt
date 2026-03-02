@@ -119,6 +119,7 @@ set(SOURCES
     src/ReceiveCommands-CreateGameHandlers.cc
     src/ReceiveCommands-QuestLoading.cc
     src/ReceiveCommands-ProfileHandlers.cc
+    src/ReceiveCommands-TournamentHandlers.cc
     src/ReceiveCommands.cc
     src/ReceiveSubcommands.cc
     src/ReplaySession.cc
