@@ -127,6 +127,7 @@ set(SOURCES
     src/ReceiveCommands-BBTeamHandlers.cc
     src/ReceiveCommands-Ep3BattleHandlers.cc
     src/ReceiveCommands-GameStateHandlers.cc
+    src/ReceiveCommands-MenuInfoHandlers.cc
     src/ReceiveCommands-MessagingHandlers.cc
     src/ReceiveCommands-TradeHandlers.cc
     src/ReceiveCommands-LoginHandlers.cc
