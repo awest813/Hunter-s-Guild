@@ -125,6 +125,7 @@ set(SOURCES
     src/ServerState.cc
     src/ShellCommands-Accounts.cc
     src/ShellCommands-Injection.cc
+    src/ShellCommands-ProxyGameplay.cc
     src/ShellCommands.cc
     src/ShellCommands-Tournaments.cc
     src/SignalWatcher.cc
