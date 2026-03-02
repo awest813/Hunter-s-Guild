@@ -259,3 +259,137 @@ ShellCommand c_delete_account(
       account->delete_file();
       co_return deque<string>{"Account deleted"};
     });
+
+ShellCommand c_add_license(
+    "add-license", "add-license ACCOUNT-ID TYPE CREDENTIALS...\n\
+    Add a license to an account. Each account may have multiple licenses of\n\
+    each type. The types are:\n\
+      DC-NTE: CREDENTIALS is serial number and access key (16 characters each)\n\
+      DC: CREDENTIALS is serial number and access key (8 characters each)\n\
+      PC: CREDENTIALS is serial number and access key (8 characters each)\n\
+      GC: CREDENTIALS is serial number (10 digits), access key (12 digits), and\n\
+          password (up to 8 characters)\n\
+      XB: CREDENTIALS is gamertag (up to 16 characters), user ID (16 hex\n\
+          digits), and account ID (16 hex digits)\n\
+      BB: CREDENTIALS is username and password (up to 16 characters each)\n\
+    Examples (adding licenses to account 385A92C4):\n\
+      add-license 385A92C4 DC 107862F9 d38XTu2p\n\
+      add-license 385A92C4 GC 0418572923 282949185033 hunter2\n\
+      add-license 385A92C4 BB user1 trustno1",
+    +[](ShellCommand::Args& args) -> asio::awaitable<deque<string>> {
+      auto tokens = phosg::split(args.args, ' ');
+      if (tokens.size() < 3) {
+        throw runtime_error("not enough arguments");
+      }
+
+      auto account = args.s->account_index->from_account_id(stoul(tokens[0], nullptr, 16));
+
+      string type_str = phosg::toupper(tokens[1]);
+      if (type_str == "DC-NTE") {
+        if (tokens.size() != 4) {
+          throw runtime_error("incorrect number of parameters");
+        }
+        auto license = make_shared<DCNTELicense>();
+        license->serial_number = std::move(tokens[2]);
+        license->access_key = std::move(tokens[3]);
+        args.s->account_index->add_dc_nte_license(account, license);
+
+      } else if (type_str == "DC") {
+        if (tokens.size() != 4) {
+          throw runtime_error("incorrect number of parameters");
+        }
+        auto license = make_shared<V1V2License>();
+        license->serial_number = stoul(tokens[2], nullptr, 16);
+        license->access_key = std::move(tokens[3]);
+        args.s->account_index->add_dc_license(account, license);
+
+      } else if (type_str == "PC") {
+        if (tokens.size() != 4) {
+          throw runtime_error("incorrect number of parameters");
+        }
+        auto license = make_shared<V1V2License>();
+        license->serial_number = stoul(tokens[2], nullptr, 16);
+        license->access_key = std::move(tokens[3]);
+        args.s->account_index->add_pc_license(account, license);
+
+      } else if (type_str == "GC") {
+        if (tokens.size() != 5) {
+          throw runtime_error("incorrect number of parameters");
+        }
+        auto license = make_shared<GCLicense>();
+        license->serial_number = stoul(tokens[2], nullptr, 10);
+        license->access_key = std::move(tokens[3]);
+        license->password = std::move(tokens[4]);
+        args.s->account_index->add_gc_license(account, license);
+
+      } else if (type_str == "XB") {
+        if (tokens.size() != 5) {
+          throw runtime_error("incorrect number of parameters");
+        }
+        auto license = make_shared<XBLicense>();
+        license->gamertag = std::move(tokens[2]);
+        license->user_id = stoull(tokens[3], nullptr, 16);
+        license->account_id = stoull(tokens[4], nullptr, 16);
+        args.s->account_index->add_xb_license(account, license);
+
+      } else if (type_str == "BB") {
+        if (tokens.size() != 4) {
+          throw runtime_error("incorrect number of parameters");
+        }
+        auto license = make_shared<BBLicense>();
+        license->username = std::move(tokens[2]);
+        license->password = std::move(tokens[3]);
+        args.s->account_index->add_bb_license(account, license);
+
+      } else {
+        throw runtime_error("invalid license type");
+      }
+
+      account->save();
+      co_return deque<string>{format("Account {:08X} updated", account->account_id)};
+    });
+ShellCommand c_delete_license(
+    "delete-license", "delete-license ACCOUNT-ID TYPE PRIMARY-CREDENTIAL\n\
+    Delete a license from an account. ACCOUNT-ID and TYPE have the same\n\
+    meanings as for add-license. PRIMARY-CREDENTIAL is the first credential\n\
+    for the license type; specifically:\n\
+      DC-NTE: PRIMARY-CREDENTIAL is the serial number\n\
+      DC: PRIMARY-CREDENTIAL is the serial number (8 hex digits)\n\
+      PC: PRIMARY-CREDENTIAL is the serial number (8 hex digits)\n\
+      GC: PRIMARY-CREDENTIAL is the serial number (decimal)\n\
+      XB: PRIMARY-CREDENTIAL is the user ID (16 hex digits)\n\
+      BB: PRIMARY-CREDENTIAL is the username\n\
+    Examples (deleting licenses from account 385A92C4):\n\
+      delete-license 385A92C4 DC 107862F9\n\
+      delete-license 385A92C4 PC 2F94C303\n\
+      delete-license 385A92C4 GC 0418572923\n\
+      delete-license 385A92C4 XB 7E29A2950019EB20\n\
+      delete-license 385A92C4 BB user1",
+    +[](ShellCommand::Args& args) -> asio::awaitable<deque<string>> {
+      auto tokens = phosg::split(args.args, ' ');
+      if (tokens.size() != 3) {
+        throw runtime_error("incorrect argument count");
+      }
+
+      auto account = args.s->account_index->from_account_id(stoul(tokens[0], nullptr, 16));
+
+      string type_str = phosg::toupper(tokens[1]);
+      if (type_str == "DC-NTE") {
+        args.s->account_index->remove_dc_nte_license(account, tokens[2]);
+      } else if (type_str == "DC") {
+        args.s->account_index->remove_dc_license(account, stoul(tokens[2], nullptr, 16));
+      } else if (type_str == "PC") {
+        args.s->account_index->remove_pc_license(account, stoul(tokens[2], nullptr, 16));
+      } else if (type_str == "GC") {
+        args.s->account_index->remove_gc_license(account, stoul(tokens[2], nullptr, 0));
+      } else if (type_str == "XB") {
+        args.s->account_index->remove_xb_license(account, stoull(tokens[2], nullptr, 16));
+      } else if (type_str == "BB") {
+        args.s->account_index->remove_bb_license(account, tokens[2]);
+      } else {
+        throw runtime_error("invalid license type");
+      }
+
+      account->save();
+      co_return deque<string>{format("Account {:08X} updated", account->account_id)};
+    });

@@ -19,9 +19,11 @@ trap cleanup EXIT
 
 sed 's/"AllowSavingAccounts": false,/"AllowSavingAccounts": true,\n  "RunInteractiveShell": true,/' tests/config.json > "$TMP_CONFIG"
 
-printf "add-account id=%s\nreload accounts\nlist-accounts\ndelete-account %s\nexit\n" "$ACCOUNT_ID" "$ACCOUNT_ID" | \
+printf "add-account id=%s\nadd-license %s BB user_test pass_test\ndelete-license %s BB user_test\nreload accounts\nlist-accounts\ndelete-account %s\nexit\n" \
+  "$ACCOUNT_ID" "$ACCOUNT_ID" "$ACCOUNT_ID" "$ACCOUNT_ID" | \
   "$EXECUTABLE" --config="$TMP_CONFIG" > "$TMP_OUTPUT" 2>&1
 
 rg -q "Account ${ACCOUNT_ID} added" "$TMP_OUTPUT"
+rg -q "Account ${ACCOUNT_ID} updated" "$TMP_OUTPUT"
 rg -q "Account: [0-9]+/${ACCOUNT_ID}" "$TMP_OUTPUT"
 rg -q "Account deleted" "$TMP_OUTPUT"
