@@ -129,6 +129,7 @@ set(SOURCES
     src/ReceiveCommands-GameStateHandlers.cc
     src/ReceiveCommands-MenuInfoHandlers.cc
     src/ReceiveCommands-MessagingHandlers.cc
+    src/ReceiveCommands-QuestFileHandlers.cc
     src/ReceiveCommands-TradeHandlers.cc
     src/ReceiveCommands-LoginHandlers.cc
     src/ReceiveCommands-LobbyMenuHandlers.cc
