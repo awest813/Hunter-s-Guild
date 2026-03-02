@@ -29,12 +29,11 @@ struct ShellCommand {
   const char* help_text;
   asio::awaitable<std::deque<std::string>> (*run)(Args&);
 
-  static std::vector<const ShellCommand*> commands_by_order;
-  static std::unordered_map<std::string, const ShellCommand*> commands_by_name;
-
   ShellCommand(const char* name, const char* help_text, asio::awaitable<std::deque<std::string>> (*run)(Args&));
 
   static asio::awaitable<std::deque<std::string>> dispatch_str(
       std::shared_ptr<ServerState> s, const std::string& command);
   static asio::awaitable<std::deque<std::string>> dispatch(Args& args);
+  static std::vector<const ShellCommand*>& commands_by_order();
+  static std::unordered_map<std::string, const ShellCommand*>& commands_by_name();
 };

@@ -122,6 +122,7 @@ set(SOURCES
     src/SendCommands.cc
     src/ServerShell.cc
     src/ServerState.cc
+    src/ShellCommands-Accounts.cc
     src/ShellCommands.cc
     src/SignalWatcher.cc
     src/StaticGameData.cc
