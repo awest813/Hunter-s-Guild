@@ -139,6 +139,7 @@ set(SOURCES
     src/ReceiveCommands-QuestMenuHandlers.cc
     src/ReceiveCommands-TournamentHandlers.cc
     src/ReceiveCommands.cc
+    src/ReceiveSubcommands-BossHandlers.cc
     src/ReceiveSubcommands-PlayerStateHandlers.cc
     src/ReceiveSubcommands-WorldStateHandlers.cc
     src/ReceiveSubcommands.cc
