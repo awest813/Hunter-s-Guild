@@ -160,6 +160,7 @@ set(SOURCES
     src/ReplaySession.cc
     src/SaveFileFormats.cc
     src/SendCommands.cc
+    src/SendCommands-TeamHandlers.cc
     src/ShellCommands-Admin.cc
     src/ServerShell.cc
     src/ServerState.cc
