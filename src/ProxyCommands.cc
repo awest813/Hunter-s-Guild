@@ -1242,11 +1242,15 @@ static asio::awaitable<HandlerResult> S_6x(shared_ptr<Client> c, Channel::Messag
 
 static asio::awaitable<HandlerResult> C_GXB_61(shared_ptr<Client> c, Channel::Message& msg) {
   bool modified = false;
-  // TODO: We should check if the info board text was actually modified and return MODIFIED if so.
 
   if (is_v4(c->version())) {
     auto& pd = msg.check_size_t<C_CharacterData_BB_61_98>(0xFFFF);
-    pd.info_board.encode(add_color(pd.info_board.decode(c->language())), c->language());
+    string original = pd.info_board.decode(c->language());
+    string colored = add_color(original);
+    if (original != colored) {
+      pd.info_board.encode(colored, c->language());
+      modified = true;
+    }
 
   } else {
     C_CharacterData_V3_61_98* pd;
@@ -1270,27 +1274,34 @@ static asio::awaitable<HandlerResult> C_GXB_61(shared_ptr<Client> c, Channel::Me
         c->channel->version = Version::GC_EP3_NTE;
         c->proxy_session->server_channel->version = Version::GC_EP3_NTE;
         c->specific_version = SPECIFIC_VERSION_GC_EP3_NTE;
+        modified = true;
       }
       pd = &msg.check_size_t<C_CharacterData_V3_61_98>(0xFFFF);
     }
-    pd->info_board.encode(add_color(pd->info_board.decode(c->language())), c->language());
+    string original = pd->info_board.decode(c->language());
+    string colored = add_color(original);
+    if (original != colored) {
+      pd->info_board.encode(colored, c->language());
+      modified = true;
+    }
   }
 
   co_return modified ? HandlerResult::MODIFIED : HandlerResult::FORWARD;
 }
 
 static asio::awaitable<HandlerResult> C_GX_D9(shared_ptr<Client>, Channel::Message& msg) {
+  string original = msg.data;
   phosg::strip_trailing_zeroes(msg.data);
   msg.data = add_color(msg.data);
   msg.data.push_back(0);
   while (msg.data.size() & 3) {
     msg.data.push_back(0);
   }
-  // TODO: We should check if the info board text was actually modified and return FORWARD if not.
-  co_return HandlerResult::MODIFIED;
+  co_return (msg.data == original) ? HandlerResult::FORWARD : HandlerResult::MODIFIED;
 }
 
 static asio::awaitable<HandlerResult> C_B_D9(shared_ptr<Client> c, Channel::Message& msg) {
+  string original = msg.data;
   try {
     phosg::strip_trailing_zeroes(msg.data);
     if (msg.data.size() & 1) {
@@ -1305,8 +1316,7 @@ static asio::awaitable<HandlerResult> C_B_D9(shared_ptr<Client> c, Channel::Mess
   } catch (const runtime_error& e) {
     c->log.warning_f("Failed to decode and unescape D9 command: {}", e.what());
   }
-  // TODO: We should check if the info board text was actually modified and return HandlerResult::FORWARD if not.
-  co_return HandlerResult::MODIFIED;
+  co_return (msg.data == original) ? HandlerResult::FORWARD : HandlerResult::MODIFIED;
 }
 
 template <typename T>
