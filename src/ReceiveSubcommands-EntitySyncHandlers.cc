@@ -59,6 +59,100 @@ static asio::awaitable<void> forward_subcommand_with_entity_id_transcode_t(share
   co_return;
 }
 
+template <typename CmdT>
+static asio::awaitable<void> on_update_object_state_t(shared_ptr<Client> c, SubcommandMessage& msg) {
+  auto& cmd = msg.check_size_t<CmdT>();
+
+  if (command_is_private(msg.command)) {
+    co_return;
+  }
+  auto l = c->require_lobby();
+  if (!l->is_game()) {
+    co_return;
+  }
+
+  auto obj_st = l->map_state->object_state_for_index(c->version(), cmd.object_index);
+  obj_st->game_flags = cmd.flags;
+  l->log.info_f("K-{:03X} updated with game_flags={:08X}", obj_st->k_id, obj_st->game_flags);
+
+  if ((cmd.object_index & 0xF000) || (cmd.header.entity_id != (cmd.object_index | 0x4000))) {
+    throw runtime_error("mismatched object id/index");
+  }
+
+  for (auto lc : l->clients) {
+    if (lc && (lc != c)) {
+      cmd.object_index = l->map_state->index_for_object_state(lc->version(), obj_st);
+      if (cmd.object_index != 0xFFFF) {
+        cmd.header.entity_id = 0x4000 | cmd.object_index;
+        send_command_t(lc, 0x60, 0x00, cmd);
+      }
+    }
+  }
+}
+
+asio::awaitable<void> on_update_object_state_6x0B(shared_ptr<Client> c, SubcommandMessage& msg) {
+  co_await on_update_object_state_t<G_UpdateObjectState_6x0B>(c, msg);
+}
+
+asio::awaitable<void> on_update_object_state_6x86(shared_ptr<Client> c, SubcommandMessage& msg) {
+  co_await on_update_object_state_t<G_HitDestructibleObject_6x86>(c, msg);
+}
+
+asio::awaitable<void> on_update_attackable_col_state(shared_ptr<Client> c, SubcommandMessage& msg) {
+  const auto& cmd = msg.check_size_t<G_UpdateAttackableColState_6x91>();
+  if ((cmd.object_index & 0xF000) || ((cmd.object_index | 0x4000) != cmd.header.entity_id)) {
+    throw runtime_error("incorrect object IDs in 6x91 command");
+  }
+
+  auto l = c->require_lobby();
+  if (!l->is_game()) {
+    co_return;
+  }
+
+  if (l->switch_flags &&
+      (cmd.should_set == 1) &&
+      (cmd.switch_flag_num < 0x100) &&
+      (cmd.floor < 0x12) &&
+      (cmd.header.entity_id >= 0x4000) &&
+      (cmd.header.entity_id != 0xFFFF)) {
+    l->switch_flags->set(cmd.floor, cmd.switch_flag_num);
+  }
+
+  co_await on_update_object_state_t<G_UpdateAttackableColState_6x91>(c, msg);
+}
+
+template <typename CmdT>
+static asio::awaitable<void> on_vol_opt_actions_t(shared_ptr<Client> c, SubcommandMessage& msg) {
+  auto& cmd = msg.check_size_t<CmdT>();
+
+  if (command_is_private(msg.command)) {
+    co_return;
+  }
+  auto l = c->require_lobby();
+  if (!l->is_game()) {
+    co_return;
+  }
+
+  if (cmd.entity_index_count > 6) {
+    throw runtime_error("invalid 6x16/6x84 command");
+  }
+  for (size_t z = 0; z < cmd.entity_index_table.size(); z++) {
+    if (cmd.entity_index_table[z] >= 6) {
+      throw runtime_error("invalid 6x16/6x84 command");
+    }
+  }
+
+  co_await forward_subcommand_with_entity_id_transcode_t<CmdT>(c, msg);
+}
+
+asio::awaitable<void> on_vol_opt_actions_6x16(shared_ptr<Client> c, SubcommandMessage& msg) {
+  co_await on_vol_opt_actions_t<G_VolOptBossActions_6x16>(c, msg);
+}
+
+asio::awaitable<void> on_vol_opt_actions_6x84(shared_ptr<Client> c, SubcommandMessage& msg) {
+  co_await on_vol_opt_actions_t<G_VolOptBossActions_6x84>(c, msg);
+}
+
 asio::awaitable<void> on_switch_state_changed(shared_ptr<Client> c, SubcommandMessage& msg) {
   auto& cmd = msg.check_size_t<G_WriteSwitchFlag_6x05>();
 

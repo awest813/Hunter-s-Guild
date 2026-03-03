@@ -149,6 +149,7 @@ set(SOURCES
     src/ReceiveSubcommands-ForwardingHandlers.cc
     src/ReceiveSubcommands-EntitySyncHandlers.cc
     src/ReceiveSubcommands-ItemLifecycleHandlers.cc
+    src/ReceiveSubcommands-JoiningSyncHandlers.cc
     src/ReceiveSubcommands-MovementHandlers.cc
     src/ReceiveSubcommands-PlayerStateHandlers.cc
     src/ReceiveSubcommands-QuestStateHandlers.cc
