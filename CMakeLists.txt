@@ -140,6 +140,7 @@ set(SOURCES
     src/ReceiveCommands-TournamentHandlers.cc
     src/ReceiveCommands.cc
     src/ReceiveSubcommands-BossHandlers.cc
+    src/ReceiveSubcommands-BBQuestItemHandlers.cc
     src/ReceiveSubcommands-CommunicationHandlers.cc
     src/ReceiveSubcommands-Ep3BBMenuHandlers.cc
     src/ReceiveSubcommands-ExpAndMesetaHandlers.cc
