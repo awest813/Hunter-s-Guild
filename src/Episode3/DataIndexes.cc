@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 
+#include <algorithm>
 #include <array>
 #include <chrono>
 #include <deque>
@@ -2606,9 +2607,9 @@ CardIndex::CardIndex(
             tag = "S: " + line.substr(2);
           }
           if (!tag.empty()) {
-            for (size_t offset = tag.find("  "); offset != string::npos; offset = tag.find("  ")) {
-              tag = tag.substr(0, offset) + tag.substr(offset + 1);
-            }
+            tag.erase(std::unique(tag.begin(), tag.end(), [](char a, char b) {
+              return a == ' ' && b == ' ';
+            }), tag.end());
             tags.emplace_back(std::move(tag));
           }
         }
