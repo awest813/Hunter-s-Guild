@@ -142,6 +142,7 @@ set(SOURCES
     src/ReceiveSubcommands-BossHandlers.cc
     src/ReceiveSubcommands-BBQuestItemHandlers.cc
     src/ReceiveSubcommands-BattleChallengeHandlers.cc
+    src/ReceiveSubcommands-BBInventoryHandlers.cc
     src/ReceiveSubcommands-CommunicationHandlers.cc
     src/ReceiveSubcommands-Ep3BBMenuHandlers.cc
     src/ReceiveSubcommands-ExpAndMesetaHandlers.cc
