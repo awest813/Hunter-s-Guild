@@ -6,7 +6,7 @@ This project includes code that was reverse-engineered by the community in ages 
 
 Feel free to submit GitHub issues if you find bugs or have feature requests. I'd like to make the server as stable and complete as possible, but I can't promise that I'll respond to issues in a timely manner, because this is a personal project undertaken primarily for the fun of reverse-engineering. If you want to contribute to newserv yourself, pull requests are welcome as well.
 
-See TODO.md for a list of known issues and future work I've curated, or go to the GitHub issue tracker for issues and requests submitted by the community.
+See TODO.md for a list of known issues and future work I've curated, or go to the GitHub issue tracker for issues and requests submitted by the community. See ROADMAP.md for the prioritized modernization plan, which covers bug fixes, QoL improvements, and longer-term technical changes while keeping the vanilla PSO experience intact.
 
 **Table of contents**
 * Background
