@@ -183,6 +183,9 @@ public:
   };
 
   explicit AccountIndex(bool force_all_temporary);
+  explicit AccountIndex(
+      bool force_all_temporary,
+      const std::unordered_map<uint32_t, std::shared_ptr<Account>>& existing_accounts);
   virtual ~AccountIndex() = default;
 
   std::shared_ptr<Account> create_account(bool is_temporary) const;
