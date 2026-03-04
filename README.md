@@ -1,15 +1,16 @@
-# newserv <img align="right" src="static/s-newserv.png" />
+# Hunter's Guild (newserv fork) <img align="right" src="static/s-newserv.png" />
 
-newserv is a game server, proxy, and reverse-engineering tool for Phantasy Star Online (PSO). **To quickly get started using newserv, just read the [server setup](#server-setup) and [how to connect](#how-to-connect) sections.**
+Hunter's Guild is a community-maintained fork of newserv: a game server, proxy, and reverse-engineering tool for Phantasy Star Online (PSO). The fork's long-term goal is to provide a stable, open-source, and sustainable PSO server while preserving the vanilla gameplay experience. **To quickly get started, read the [server setup](#server-setup) and [how to connect](#how-to-connect) sections.**
 
 This project includes code that was reverse-engineered by the community in ages long past, and has been included in many projects since then. It also includes some game data from Phantasy Star Online itself, which was originally created by Sega.
 
-Feel free to submit GitHub issues if you find bugs or have feature requests. I'd like to make the server as stable and complete as possible, but I can't promise that I'll respond to issues in a timely manner, because this is a personal project undertaken primarily for the fun of reverse-engineering. If you want to contribute to newserv yourself, pull requests are welcome as well.
+Feel free to submit GitHub issues if you find bugs or have feature requests. This fork is being developed in the open and welcomes contributors who want to improve reliability, documentation, and maintainability over the long term.
 
-See TODO.md for a list of known issues and future work I've curated, or go to the GitHub issue tracker for issues and requests submitted by the community. See ROADMAP.md for the prioritized modernization plan, which covers bug fixes, QoL improvements, and longer-term technical changes while keeping the vanilla PSO experience intact.
+See TODO.md for known issues and future work, or go to the GitHub issue tracker for community requests. See ROADMAP.md for the current phased plan focused on delivering a stable, open-source, and sustainable server.
 
 **Table of contents**
 * Background
+    * [Fork direction](#fork-direction)
     * [History](#history)
     * [Other server projects](#other-server-projects)
     * [Using newserv in other projects](#using-newserv-in-other-projects)
@@ -31,6 +32,15 @@ See TODO.md for a list of known issues and future work I've curated, or go to th
     * [Chat commands](#chat-commands)
     * [REST API](#rest-api)
 * [Non-server features](#non-server-features)
+
+## Fork direction
+
+Hunter's Guild continues the technical foundation of newserv while shifting project governance and priorities toward long-term sustainability:
+
+* **Stability first**: prioritize correctness, regressions, and operational reliability.
+* **Open development**: keep planning, implementation, and review in the repository.
+* **Sustainable maintenance**: favor changes that reduce maintenance burden and improve onboarding for new contributors.
+* **Vanilla-compatible defaults**: preserve original PSO behavior by default; keep custom behavior opt-in.
 
 # History
 
