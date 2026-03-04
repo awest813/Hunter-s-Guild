@@ -3,6 +3,7 @@
 #include <inttypes.h>
 
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "CommandFormats.hh"
@@ -99,7 +100,10 @@ private:
     }
   };
 
-  std::map<std::string, std::shared_ptr<Token>> name_to_token;
+  // Performance optimization: Using std::unordered_map instead of std::map
+  // to achieve O(1) average lookup time when translating canonical string
+  // names to tokens during word select command parsing.
+  std::unordered_map<std::string, std::shared_ptr<Token>> name_to_token;
   std::array<std::vector<std::shared_ptr<Token>>, 12> tokens_by_version;
 
   inline const std::vector<std::shared_ptr<Token>>& tokens_for_version(Version version) const {
