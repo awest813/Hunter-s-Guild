@@ -1,3 +1,5 @@
+See ROADMAP.md for the full prioritized modernization plan.
+
 ## General
 
 - Make a server patch version of story flag fixer quest
