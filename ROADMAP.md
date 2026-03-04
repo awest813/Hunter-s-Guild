@@ -1,102 +1,57 @@
-# newserv Modernization Roadmap
+# Hunter's Guild Roadmap
 
-## Guiding Principles
+## Mission
 
-This roadmap describes improvements to newserv under two complementary goals:
+Build and maintain a **stable, open-source, and sustainable** PSO server fork based on newserv, with vanilla-compatible behavior by default.
 
-1. **Vanilla PSO preservation** — Core gameplay mechanics (drop rates, enemy behavior, spawn logic, quest scripts, progression) must remain faithful to the original Sega server experience unless a fix addresses a verified Sega-side bug.
-2. **Quality-of-life (QoL) fixes** — Improvements that reduce friction or fix client/server bugs are welcome as long as they do not alter the feel of playing PSO: item drop visibility, enemy HP bars, rare-drop notifications, and similar cosmetic or UX improvements.
+## Project Principles
 
-The roadmap is organized into phases. Earlier phases address correctness and stability; later phases address new optional features and technical health.
-
----
-
-## Current State Analysis
-
-### Strengths
-- Full multi-version support (DC, PC, GC, XB, BB, Ep3) with cross-version play.
-- Rich server-side drop-mode system (`CLIENT`, `SERVER_SHARED`, `SERVER_PRIVATE`, `SERVER_DUPLICATE`).
-- Extensive client-function patch infrastructure for GC and BB (BugFixes, EnemyHPBars, RareDropNotifications, CommonBank, ChatFeatures, DrawDistance, etc.).
-- Proxy mode supports playing on official or third-party servers with newserv patches applied.
-- Quest scripting support for all versions including full opcode documentation.
-- Replay and smoke-test infrastructure for regression testing.
-
-### Known Gaps and Technical Debt
-- `ItemParameterTable` implementation explicitly marked as needing a rewrite (see its class comment).
-- UI strings are not localizable; all menu text is hard-coded in English.
-- `$switchit` chat command (activate nearby switch/laser-fence/door) is not yet implemented.
-- `MeetUserExtensions` handling in proxy commands 41/C4 is incomplete.
-- BB tests coverage is thin; serialization for ItemPMT/ItemPT/ItemRT is unimplemented.
-- Several platform-specific gaps: DC HL check server, XB Guild Card exchange bug, XB F94D opcode, remaining GC ports.
-- No persistent quest-flag mechanism across connections (needed for Meet User + B2 enable interactions).
-- Episode 3 tournament deck restrictions are not enforced at COM population time.
+1. **Stability over novelty**: prioritize bug fixes, replay safety, and reliable operation.
+2. **Open-source sustainability**: prefer maintainable designs, clear docs, and contributor-friendly workflows.
+3. **Vanilla-first defaults**: preserve core PSO gameplay unless a change is an explicit fix or opt-in feature.
+4. **Incremental delivery**: ship small, testable improvements in phases.
 
 ---
 
-## Phase 1 — Bug Fixes and Correctness (Highest Priority)
+## Current Phase
 
-These items fix incorrect behavior without changing intended gameplay.
+### Phase 1 — Foundation and Stabilization
 
-| # | Item | Area | Notes |
-|---|------|------|-------|
-| 1.1 | Fix enemy flag mapping in v2/v3 crossplay | Crossplay | Enemy flags differ between versions; incorrect mapping causes game-state divergence |
-| 1.2 | Handle item replacement table in crossplay | Crossplay | Items that don't exist in target version must be substituted |
-| 1.3 | Fix v2 challenge data in `$savechar`/`$loadchar` | PSO DC | Challenge-mode save data is silently corrupted |
-| 1.4 | Fix XB Guild Card exchange from non-XB players | PSO XB | Receiving GCs from other versions crashes or fails silently |
-| 1.5 | Fix Pouilly Slime EXP on BB | PSOBB | EXP grant for this enemy is currently broken |
-| 1.6 | Fix proxy login flow for non-BB versions | Proxy | Proxy does not send 9C command when required by some login paths |
-| 1.7 | Make `reload accounts` safe against online writes | Ep3 | Race condition can cause in-memory accounts to be overwritten from disk |
-| 1.8 | Add all necessary GC number rewrites in BB proxy | PSOBB Proxy | Some BB commands still carry incorrect Guild Card numbers through the proxy |
+**Status:** In Progress
 
----
+This is the active phase for the fork.
 
-## Phase 2 — QoL Improvements (Vanilla-Compatible)
-
-These items improve the player experience without changing drop rates, enemy stats, or core gameplay rules. All features in this phase are opt-in via server configuration or chat commands.
-
-| # | Item | Area | Notes |
-|---|------|------|-------|
-| 2.1 | Add `$switchit` chat command | Server-side | Activates nearest switch/laser fence/door flag; useful for testing and accessibility |
-| 2.2 | Persist quest flags across connections | Server-side | Required for Meet User + B2 enable quest to work reliably |
-| 2.3 | Add server-side story flag fixer | Server-side | Port the existing story-flag-fixer quest to run as a server patch at login |
-| 2.4 | Make server-specified rare enemies work with proxy maps | PSOBB Proxy | Rare enemy overrides are ignored when maps are loaded through the proxy |
-| 2.5 | Make `MeetUserExtensions` fully transparent in proxy | Proxy | Rewrite embedded 19 commands and track state in persistent per-connection config |
-| 2.6 | Make UI strings localizable | Server-side | Move all menu/welcome text to an external string table so operators can translate it |
-| 2.7 | Ep3 tournament deck restriction enforcement | Ep3 | Enforce rank checks and No Assist option when populating COMs at tournament start |
-| 2.8 | Ep3 Meseta-based rank system | Ep3 | Implement visible player ranks derived from total lifetime Meseta earned |
-| 2.9 | Research and document XB F94D quest opcode | PSO XB | Opcode behavior is unknown; document or implement once understood |
-| 2.10 | Port remaining GC memory patches to XB | PSO XB | Several GC client-function patches have no XB equivalent yet |
-| 2.11 | Ep3 NTE: AR code to remove SAMPLE overlays | Ep3 NTE | Visual polish for the trial edition; safe client-side patch |
+| # | Priority Item                          | Outcome                                                     |
+|---|----------------------------------------|-------------------------------------------------------------|
+| 1.1 | Triage and fix high-impact crashes/desyncs | Fewer production incidents and safer cross-version sessions |
+| 1.2 | Improve regression confidence with replay/smoke tests | Faster, safer releases with less manual validation |
+| 1.3 | Tighten operational docs (`README.md`, setup, recovery notes) | Easier onboarding and lower maintenance overhead |
+| 1.4 | Keep TODO/issue tracking aligned to shipped changes | Transparent project status for contributors and operators |
 
 ---
 
-## Phase 3 — Technical Modernization
+## Next Phases
 
-These items improve code health, maintainability, and long-term extensibility. They have no visible effect on gameplay.
+### Phase 2 — Vanilla-Compatible Quality of Life
 
-| # | Item | Area | Notes |
-|---|------|------|-------|
-| 3.1 | Rewrite `ItemParameterTable` | Core | Replace raw offset-table branching with virtual-function class hierarchy (see existing TODO comment in the class header) |
-| 3.2 | Implement serialization for ItemPMT, ItemPT, ItemRT | PSOBB | Required for round-tripping modified tables; also blocks BB proxy rare-enemy feature |
-| 3.3 | Expand BB smoke and regression tests | PSOBB | Record more BB game scenarios as replay tests; pair with the serialization work above |
-| 3.4 | Investigate DC HL check server (Rust TLS) | PSO DC | Evaluate `blaze-ssl-async` crate as a basis for implementing the HL check server |
-| 3.5 | Extend crossplay test coverage | Crossplay | Add replay tests covering v2/v3 crossplay drop scenarios once Phase 1 fixes land |
+Deliver opt-in improvements that do not alter core gameplay balance:
+
+- Small usability and accessibility features.
+- Documentation and operator ergonomics improvements.
+- Additional safe proxy/server compatibility fixes.
+
+### Phase 3 — Long-Term Sustainability
+
+Strengthen maintainability and contributor experience:
+
+- Refactor high-complexity subsystems when justified by bug risk.
+- Expand automated test coverage around historically fragile paths.
+- Improve internal documentation for protocol and file format behavior.
 
 ---
 
-## Implementation Notes
+## How Work Gets Prioritized
 
-### Adding a New Chat Command (`$switchit` example)
-1. Implement the handler function in `src/ChatCommands.cc` following the pattern of existing commands (e.g., `cc_warp`).
-2. Register a `ChatCommandDefinition` instance with the desired name(s).
-3. Add a corresponding test entry in `tests/` following the shell-based test conventions.
-4. Document the command in `README.md` under the "Chat commands" section.
-
-### Adding or Modifying Client-Function Patches
-- Patches live under `system/client-functions/<PatchName>/`.
-- Each file is named `<PatchName>.<VersionTag>.patch.s` (e.g., `3___` = GC, `4___` = BB, `59NL` = PSOBB NA).
-- Memory region assignments for GC patches are tracked in `system/client-functions/notes.txt`; update this file when adding new patches.
-
-### Tracking Progress
-- Individual bug-fix items from this roadmap should be moved to `TODO.md` once they are actively being worked on, following the existing format in that file.
-- Completed items should be removed from both this file and `TODO.md` and noted in the commit message.
+1. Player-impacting correctness and crash fixes.
+2. Changes that reduce maintenance burden for operators and contributors.
+3. Optional features that remain vanilla-compatible and low-risk.
