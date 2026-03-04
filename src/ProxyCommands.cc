@@ -203,9 +203,18 @@ static void send_9E_XB_to_server(std::shared_ptr<Client> c) {
   c->proxy_session->server_channel->send(0x9E, 0x01, &cmd, sizeof(C_LoginExtended_XB_9E));
 }
 
-static asio::awaitable<HandlerResult> S_G_9A(shared_ptr<Client> c, Channel::Message&) {
-  // TODO: Either delete this handler or finish implementing it (flag=00/02 should do the below, 01 should send 9C,
-  // anything else should end the session)
+static void send_9C_to_server(std::shared_ptr<Client> c) {
+  C_Register_DC_PC_V3_9C cmd = {};
+  cmd.hardware_id = c->hardware_id;
+  cmd.sub_version = c->sub_version;
+  cmd.language = c->language();
+  cmd.serial_number.encode(c->serial_number);
+  cmd.access_key.encode(c->access_key);
+  cmd.password.encode(c->password);
+  c->proxy_session->server_channel->send(0x9C, 0x00, &cmd, sizeof(cmd));
+}
+
+static void send_9E_to_server(std::shared_ptr<Client> c) {
   C_LoginExtended_GC_9E cmd;
   if (c->proxy_session->remote_guild_card_number < 0) {
     cmd.player_tag = 0xFFFF0000;
@@ -226,12 +235,36 @@ static asio::awaitable<HandlerResult> S_G_9A(shared_ptr<Client> c, Channel::Mess
   cmd.access_key2.encode(c->access_key2);
   cmd.login_character_name.encode(c->login_character_name, c->language());
   cmd.client_config = c->proxy_session->remote_client_config_data;
-
   // If there's a guild card number, a shorter 9E is sent that ends right after the client config data
   c->proxy_session->server_channel->send(
       0x9E, 0x01, &cmd,
       cmd.is_extended ? sizeof(C_LoginExtended_GC_9E) : sizeof(C_Login_PC_GC_9E));
+}
 
+static asio::awaitable<HandlerResult> S_G_9A(shared_ptr<Client> c, Channel::Message& msg) {
+  if (msg.flag == 0x01) {
+    // Registration required: send 9C to register with the remote server
+    send_9C_to_server(c);
+  } else if (msg.flag == 0x00 || msg.flag == 0x02) {
+    // License ok: proceed with extended login
+    send_9E_to_server(c);
+  } else {
+    c->log.warning_f("Proxy received 9A with unexpected flag {:02X}; disconnecting from remote server", msg.flag);
+    c->proxy_session->server_channel->disconnect();
+  }
+  co_return HandlerResult::SUPPRESS;
+}
+
+static asio::awaitable<HandlerResult> S_G_9C(shared_ptr<Client> c, Channel::Message& msg) {
+  // The remote server responded to our 9C (registration) command. In PSO, the 9C result uses a
+  // nonzero flag to indicate success (see CommandFormats.hh: "If header.flag is nonzero, the
+  // client proceeds with the login procedure"). A zero flag means registration failed.
+  if (msg.flag != 0x00) {
+    send_9E_to_server(c);
+  } else {
+    c->log.warning_f("Proxy received 9C with failure flag; disconnecting from remote server");
+    c->proxy_session->server_channel->disconnect();
+  }
   co_return HandlerResult::SUPPRESS;
 }
 
@@ -297,8 +330,9 @@ static asio::awaitable<HandlerResult> S_V123U_02_17(shared_ptr<Client> c, Channe
         send_DB_to_server(c);
         co_return HandlerResult::SUPPRESS;
       } else {
-        // For command 02, send the same as if we had received 9A from the server
-        co_return co_await S_G_9A(c, msg);
+        // For command 02, send an initial extended login command to the server
+        send_9E_to_server(c);
+        co_return HandlerResult::SUPPRESS;
       }
       throw logic_error("GC init command not handled");
 
@@ -2401,7 +2435,7 @@ static std::array<std::array<MessageHandler, NUM_VERSIONS>, 0x100> server_handle
 /* 99 */ {S_invalid,     S_invalid,     S_invalid,     S_invalid,     S_invalid,        S_invalid,        S_invalid,     S_invalid,     S_invalid,        S_invalid,        S_invalid,        S_invalid,        S_invalid,     S_invalid},
 /* 9A */ {S_invalid,     S_invalid,     S_invalid,     nullptr,       nullptr,          nullptr,          nullptr,       nullptr,       nullptr,          S_G_9A,           S_G_9A,           S_G_9A,           nullptr,       nullptr},
 /* 9B */ {S_invalid,     S_invalid,     S_invalid,     nullptr,       nullptr,          nullptr,          nullptr,       nullptr,       nullptr,          nullptr,          nullptr,          nullptr,          nullptr,       nullptr},
-/* 9C */ {S_invalid,     S_invalid,     S_invalid,     nullptr,       nullptr,          nullptr,          nullptr,       nullptr,       nullptr,          nullptr,          nullptr,          nullptr,          nullptr,       nullptr},
+/* 9C */ {S_invalid,     S_invalid,     S_invalid,     nullptr,       nullptr,          nullptr,          nullptr,       nullptr,       nullptr,          S_G_9C,           S_G_9C,           S_G_9C,           nullptr,       nullptr},
 /* 9D */ {S_invalid,     S_invalid,     S_invalid,     S_invalid,     S_invalid,        S_invalid,        S_invalid,     S_invalid,     S_invalid,        S_invalid,        S_invalid,        S_invalid,        S_invalid,     S_invalid},
 /* 9E */ {S_invalid,     S_invalid,     S_invalid,     S_invalid,     S_invalid,        S_invalid,        S_invalid,     S_invalid,     S_invalid,        S_invalid,        S_invalid,        S_invalid,        S_invalid,     S_invalid},
 /* 9F */ {S_invalid,     S_invalid,     S_invalid,     S_invalid,     S_invalid,        S_invalid,        S_invalid,     S_invalid,     S_invalid,        nullptr,          nullptr,          nullptr,          nullptr,       nullptr},

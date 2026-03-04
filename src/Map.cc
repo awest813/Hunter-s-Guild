@@ -6247,6 +6247,15 @@ void MapState::index_super_map(const FloorConfig& fc, shared_ptr<RandomGenerator
             }
           }
 
+        } else if (ene->child_index > 0) {
+          // For child enemies on BB (e.g. slimes in a group), inherit the parent's rare status so
+          // the entire group is consistently rare rather than each unit rolling independently.
+          if (ene_st->e_id < ene->child_index) {
+            throw logic_error("child enemy state index is less than child_index");
+          }
+          if (this->enemy_states.at(ene_st->e_id - ene->child_index)->is_rare(v)) {
+            ene_st->set_rare(v);
+          }
         } else if ((bb_rare_rate > 0) && (this->bb_rare_enemy_indexes.size() < 0x10) && (rand_crypt->next() < bb_rare_rate)) {
           this->bb_rare_enemy_indexes.emplace_back(enemy_index);
           ene_st->set_rare(v);
@@ -6818,6 +6827,11 @@ void MapState::verify() const {
         continue;
       }
       if (ene->super_ene->is_default_rare_bb) {
+        continue;
+      }
+      // Child enemies inherit their parent's rare status on BB rather than having their own
+      // index in bb_rare_enemy_indexes, so skip them in this validation.
+      if (ene->super_ene->child_index > 0) {
         continue;
       }
       size_t base_enemy_index = this->floor_config(ene->super_ene->floor).base_indexes_for_version(Version::BB_V4).base_enemy_index;
