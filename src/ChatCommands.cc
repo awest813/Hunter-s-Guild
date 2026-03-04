@@ -2780,6 +2780,67 @@ ChatCommandDefinition cc_swsetall(
       co_return;
     });
 
+ChatCommandDefinition cc_switchit(
+    {"$switchit"},
+    +[](const Args& a) -> asio::awaitable<void> {
+      a.check_debug_enabled();
+      a.check_is_proxy(false);
+      a.check_is_game(true);
+      auto l = a.c->require_lobby();
+      auto s = a.c->require_server_state();
+      if (!l->map_state) {
+        throw precondition_failed("$C4No map loaded");
+      }
+      if (l->episode == Episode::EP3) {
+        throw precondition_failed("$C4Not supported in\nEpisode 3");
+      }
+
+      uint8_t area = l->area_for_floor(a.c->version(), a.c->floor);
+      uint8_t layout_var = (a.c->floor < 0x10) ? l->variations.entries[a.c->floor].layout.load() : 0x00;
+
+      double min_dist2 = -1.0;
+      shared_ptr<const MapState::ObjectState> nearest_obj;
+
+      for (const auto& it : l->map_state->iter_object_states(a.c->version())) {
+        if (!it->super_obj || (it->super_obj->floor != a.c->floor)) {
+          continue;
+        }
+        const auto& def = it->super_obj->version(a.c->version());
+        if (!def.set_entry) {
+          continue;
+        }
+        VectorXYZF worldspace_pos;
+        try {
+          const auto& room = s->room_layout_index->get_room(area, layout_var, def.set_entry->room);
+          worldspace_pos = def.set_entry->pos.rotate_x(room.angle.x).rotate_z(room.angle.z).rotate_y(room.angle.y) + room.position;
+        } catch (const out_of_range&) {
+          worldspace_pos = def.set_entry->pos;
+        }
+        float dist2 = (VectorXZF(worldspace_pos) - a.c->pos).norm2();
+        if ((min_dist2 < 0.0) || (dist2 < min_dist2)) {
+          nearest_obj = it;
+          min_dist2 = dist2;
+        }
+      }
+
+      if (!nearest_obj) {
+        throw precondition_failed("$C4No objects are nearby");
+      }
+
+      const auto* set_entry = nearest_obj->super_obj->version(a.c->version()).set_entry;
+      // param4 holds the switch flag number for most switch-driven objects (laser fences, doors, floor switches,
+      // etc.). We mask to uint8_t because the switch flag field in G_WriteSwitchFlag_6x05 is a single byte; the
+      // upper bits of param4 are used for other purposes by some object types (e.g. door numbering).
+      uint8_t flag_num = set_entry->param4 & 0xFF;
+      G_WriteSwitchFlag_6x05 cmd = {{0x05, 0x03, 0xFFFF}, 0, 0, flag_num, a.c->floor, 0x01};
+      if (l->switch_flags) {
+        l->switch_flags->set(a.c->floor, flag_num);
+      }
+      send_command_t(l, 0x60, 0x00, cmd);
+      send_text_message_fmt(a.c, "Activated switch flag\n{} on floor {:X}", flag_num, a.c->floor);
+      co_return;
+    });
+
 ChatCommandDefinition cc_switchchar(
     {"$switchchar"},
     +[](const Args& a) -> asio::awaitable<void> {
