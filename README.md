@@ -613,6 +613,7 @@ Some commands only work for clients not in proxy sessions. The chat commands are
     * `$qsyncall <reg-num> <value>`: Set a quest register's value for everyone in the game. `<reg-num>` should be either rXX (e.g. r60) or fXX (e.g. f60); if the latter, `<value>` is parsed as a floating-point value instead of as an integer.
     * `$swset [floor] <flag-num>` and `$swclear [floor] <flag-num>`: Set or clear a switch flag. If floor is not given, sets or clears the flag on your current floor.
     * `$swsetall`: Set all switch flags on your current floor. This unlocks all doors, disables all laser fences, triggers all light/poison switches, etc.
+    * `$switchit` (non-proxy only): Activate the switch flag for the nearest map object on your current floor (e.g. a laser fence, door, or floor switch). The flag number is read from the lower byte of the object's param4 field, which is where most switch-driven objects store it. Use `$whatobj` first to identify the object type and ID. For objects that store their switch flag in a different param field (e.g. fog collision uses param6), or for multi-flag doors, use `$swset` directly instead. The per-object param layout is documented in the comments in `src/Map.cc` (see `dat_object_definitions`).
     * `$gc` (non-proxy only): Send your own Guild Card to yourself.
     * `$sc <data>`: Send a command to yourself.
     * `$ss <data>`: Send a command to the remote server (if in a proxy session) or to the game server.
