@@ -2832,7 +2832,7 @@ ChatCommandDefinition cc_switchit(
       // etc.). We mask to uint8_t because the switch flag field in G_WriteSwitchFlag_6x05 is a single byte; the
       // upper bits of param4 are used for other purposes by some object types (e.g. door numbering).
       uint8_t flag_num = set_entry->param4 & 0xFF;
-      G_WriteSwitchFlag_6x05 cmd = {{0x05, 0x03, 0xFFFF}, 0, 0, flag_num, a.c->floor, 0x01};
+      G_WriteSwitchFlag_6x05 cmd = {{0x05, 0x03, 0xFFFF}, 0, 0, flag_num, static_cast<uint8_t>(a.c->floor), 0x01};
       if (l->switch_flags) {
         l->switch_flags->set(a.c->floor, flag_num);
       }
