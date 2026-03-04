@@ -15,12 +15,14 @@ Build and maintain a **stable, open-source, and sustainable** PSO server fork ba
 
 ## Current Phase
 
-### Phase 1 — Foundation and Stabilization (In Progress)
+### Phase 1 — Foundation and Stabilization
+
+**Status:** In Progress
 
 This is the active phase for the fork.
 
-| # | Priority Item | Outcome |
-|---|---------------|---------|
+| # | Priority Item                          | Outcome                                                     |
+|---|----------------------------------------|-------------------------------------------------------------|
 | 1.1 | Triage and fix high-impact crashes/desyncs | Fewer production incidents and safer cross-version sessions |
 | 1.2 | Improve regression confidence with replay/smoke tests | Faster, safer releases with less manual validation |
 | 1.3 | Tighten operational docs (`README.md`, setup, recovery notes) | Easier onboarding and lower maintenance overhead |
