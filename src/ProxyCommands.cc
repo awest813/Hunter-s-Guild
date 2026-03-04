@@ -394,7 +394,7 @@ static asio::awaitable<HandlerResult> S_B_03(shared_ptr<Client> c, Channel::Mess
 }
 
 static asio::awaitable<HandlerResult> S_B_E6(shared_ptr<Client> c, Channel::Message& msg) {
-  const auto& cmd = msg.check_size_t<S_ClientInit_BB_00E6>(0xFFFF);
+  auto& cmd = msg.check_size_t<S_ClientInit_BB_00E6>(0xFFFF);
   c->proxy_session->remote_guild_card_number = cmd.guild_card_number;
   c->bb_security_token = cmd.security_token;
   c->bb_client_config = cmd.client_config;
@@ -406,7 +406,16 @@ static asio::awaitable<HandlerResult> S_B_E6(shared_ptr<Client> c, Channel::Mess
   pc.enable_remote_ip_crc_patch = c->proxy_session->enable_remote_ip_crc_patch;
   c->log.info_f("Updated persistent config for proxy session");
 
-  co_return HandlerResult::FORWARD;
+  // Rewrite the guild card number to the client's local account ID so the BB
+  // client consistently sees its own local identity, even on remote servers
+  // that assign a different guild card number.
+  bool modified = false;
+  if (c->login && c->login->account->account_id != c->proxy_session->remote_guild_card_number) {
+    cmd.guild_card_number = c->login->account->account_id;
+    modified = true;
+  }
+
+  co_return modified ? HandlerResult::MODIFIED : HandlerResult::FORWARD;
 }
 
 static asio::awaitable<HandlerResult> S_V123_04(shared_ptr<Client> c, Channel::Message& msg) {
@@ -455,6 +464,19 @@ static asio::awaitable<HandlerResult> S_V123_04(shared_ptr<Client> c, Channel::M
   }
 
   co_return c->login ? HandlerResult::MODIFIED : HandlerResult::FORWARD;
+}
+
+static asio::awaitable<HandlerResult> S_B_04(shared_ptr<Client> c, Channel::Message& msg) {
+  auto& cmd = msg.check_size_t<S_UpdateClientConfig_BB_04>();
+  if (c->proxy_session->remote_guild_card_number != cmd.guild_card_number) {
+    c->proxy_session->remote_guild_card_number = cmd.guild_card_number;
+    c->log.info_f("Remote guild card number set to {}", c->proxy_session->remote_guild_card_number);
+  }
+  if (c->login) {
+    cmd.guild_card_number = c->login->account->account_id;
+    co_return HandlerResult::MODIFIED;
+  }
+  co_return HandlerResult::FORWARD;
 }
 
 static asio::awaitable<HandlerResult> S_V123_06(shared_ptr<Client> c, Channel::Message& msg) {
@@ -2274,7 +2296,7 @@ static std::array<std::array<MessageHandler, NUM_VERSIONS>, 0x100> server_handle
 /* 01 */ {S_invalid,     S_invalid,     nullptr,       nullptr,       nullptr,          nullptr,          nullptr,       nullptr,       nullptr,          nullptr,          nullptr,          nullptr,          nullptr,       nullptr},
 /* 02 */ {S_V123U_02_17, S_V123U_02_17, S_V123U_02_17, S_V123U_02_17, S_V123U_02_17,    S_V123U_02_17,    S_V123U_02_17, S_V123U_02_17, S_V123U_02_17,    S_V123U_02_17,    S_V123U_02_17,    S_V123U_02_17,    S_V123U_02_17, nullptr},
 /* 03 */ {S_invalid,     S_invalid,     nullptr,       nullptr,       nullptr,          nullptr,          nullptr,       nullptr,       nullptr,          nullptr,          nullptr,          nullptr,          nullptr,       S_B_03},
-/* 04 */ {S_U_04,        S_U_04,        S_V123_04,     S_V123_04,     S_V123_04,        S_V123_04,        S_V123_04,     S_V123_04,     S_V123_04,        S_V123_04,        S_V123_04,        S_V123_04,        S_V123_04,     nullptr},
+/* 04 */ {S_U_04,        S_U_04,        S_V123_04,     S_V123_04,     S_V123_04,        S_V123_04,        S_V123_04,     S_V123_04,     S_V123_04,        S_V123_04,        S_V123_04,        S_V123_04,        S_V123_04,     S_B_04},
 /* 05 */ {nullptr,       nullptr,       nullptr,       nullptr,       nullptr,          nullptr,          nullptr,       nullptr,       nullptr,          nullptr,          nullptr,          nullptr,          nullptr,       nullptr},
 /* 06 */ {nullptr,       nullptr,       S_V123_06,     S_V123_06,     S_V123_06,        S_V123_06,        S_V123_06,     S_V123_06,     S_V123_06,        S_V123_06,        S_V123_06,        S_V123_06,        S_V123_06,     nullptr},
 /* 07 */ {nullptr,       nullptr,       nullptr,       nullptr,       nullptr,          nullptr,          nullptr,       nullptr,       nullptr,          nullptr,          nullptr,          nullptr,          nullptr,       nullptr},

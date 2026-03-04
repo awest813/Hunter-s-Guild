@@ -1571,7 +1571,18 @@ void ServerState::load_bb_system_defaults() {
 
 void ServerState::load_accounts() {
   config_log.info_f("Indexing accounts");
-  this->account_index = make_shared<AccountIndex>(!this->allow_saving_accounts);
+  // Collect currently online accounts so their in-memory state is preserved
+  // when the index is rebuilt from disk, preventing unsaved changes from being
+  // clobbered by stale data read from disk.
+  unordered_map<uint32_t, shared_ptr<Account>> online_accounts;
+  if (this->game_server) {
+    for (const auto& c : this->game_server->all_clients()) {
+      if (c->login && c->login->account && !c->login->account->is_temporary) {
+        online_accounts.emplace(c->login->account->account_id, c->login->account);
+      }
+    }
+  }
+  this->account_index = make_shared<AccountIndex>(!this->allow_saving_accounts, online_accounts);
 }
 
 void ServerState::load_teams() {

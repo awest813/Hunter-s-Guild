@@ -1018,6 +1018,11 @@ shared_ptr<Account> AccountIndex::create_temporary_account_for_shared_account(
 }
 
 AccountIndex::AccountIndex(bool force_all_temporary)
+    : AccountIndex(force_all_temporary, {}) {}
+
+AccountIndex::AccountIndex(
+    bool force_all_temporary,
+    const unordered_map<uint32_t, shared_ptr<Account>>& existing_accounts)
     : force_all_temporary(force_all_temporary) {
   if (!this->force_all_temporary) {
     if (!std::filesystem::is_directory("system/licenses")) {
@@ -1028,7 +1033,16 @@ AccountIndex::AccountIndex(bool force_all_temporary)
         if (filename.ends_with(".json")) {
           try {
             phosg::JSON json = phosg::JSON::parse(phosg::load_file("system/licenses/" + filename));
-            this->add(make_shared<Account>(json));
+            // If an online player already has this account in memory, use the
+            // existing object to avoid overwriting unsaved in-memory changes.
+            // Parse the account to get its ID, then check existing_accounts.
+            auto new_account = make_shared<Account>(json);
+            auto existing_it = existing_accounts.find(new_account->account_id);
+            if (existing_it != existing_accounts.end()) {
+              this->add(existing_it->second);
+            } else {
+              this->add(new_account);
+            }
           } catch (const exception& e) {
             phosg::log_error_f("Failed to index account {}", filename);
             throw;
