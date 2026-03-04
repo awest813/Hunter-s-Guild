@@ -2540,8 +2540,10 @@ bool RulerServer::MovePath::is_valid() const {
 
 void RulerServer::offsets_for_direction(
     const Location& loc, int32_t* out_x_offset, int32_t* out_y_offset) {
-  // Note: This function has opposite behavior for the UP and DOWN directions as compared to the global array of the
-  // same name. TODO: Figure out why this difference exists and document it.
+  // Note: This function has opposite behavior for the UP and DOWN directions as compared to the movement offsets array
+  // (used in flood_fill_move_path). This is because the summon area logic (which uses this function) assumes that Y
+  // increases upwards (UP = +1, DOWN = -1), whereas the rest of the game's coordinate system assumes that Y increases
+  // downwards (UP = -1, DOWN = +1).
   switch (loc.direction) {
     case Direction::LEFT:
       *out_x_offset = -1;
