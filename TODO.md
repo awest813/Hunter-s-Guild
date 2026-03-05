@@ -1,13 +1,18 @@
-See ROADMAP.md for the full prioritized modernization plan.
+See ROADMAP.md for the current phased plan. The items below track known bugs and future work; they are updated as issues are opened, fixed, or become obsolete. Each item should correspond to a GitHub issue where applicable.
+
+## Phase 1 — Active priorities (see ROADMAP.md §1.1)
+
+These items are directly linked to Phase 1.1 (high-impact crashes/desyncs):
+
+- Fix enemy flag mapping in v2/v3 crossplay and test
+- Handle items in crossplay — use the replacement table
+- Make proxy server handle all login commands on non-BB, including sending 9C when needed
+- Handle MeetUserExtensions properly in 41 and C4 commands on the proxy (rewrite the embedded 19 command and put some metadata in the persistent config, perhaps)
 
 ## General
 
 - Make a server patch version of story flag fixer quest
-- Fix enemy flag mapping in v2/v3 crossplay and test
-- Handle items in crossplay - use the replacement table
-- Make proxy server handle all login commands on non-BB, including sending 9C when needed
 - Add a way to persist flags across connections, at least on v3, because of Meet User + B2 enable quest interactions - maybe update the quest to patch one of the login commands so the server can tell it's enabled
-- Handle MeetUserExtensions properly in 41 and C4 commands on the proxy (rewrite the embedded 19 command and put some metadata in the persistent config, perhaps)
 - Clean up ItemParameterTable implementation (see comment at the top of the class definition)
 - Make UI strings localizable (e.g. entries in menus, welcome message, etc.)
 
