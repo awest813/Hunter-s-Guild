@@ -150,12 +150,12 @@ Hunter's Guild works on macOS, Windows, and Ubuntu Linux. It will likely work on
 1. Download the latest release.zip file from the [releases page](https://github.com/awest813/Hunter-s-Guild/releases).
 2. Extract the contents of the archive to some location on your computer.
 3. Go into the system/ folder, open config.json in a text editor, and edit it to your liking. There are comments in the file that describe what all the options do. Most of the options can be left alone if you want default behavior, but on Windows, you must change LocalAddress and ExternalAddress.
-4. (Optional) If you plan to play Blue Burst on newserv, set up the patch directory. See [client patch directories](#client-patch-directories) for details.
+4. (Optional) If you plan to play Blue Burst on Hunter's Guild, set up the patch directory. See [client patch directories](#client-patch-directories) for details.
 5. Run the newserv executable.
 
 ### Linux
 
-There are currently no precompiled releases for Linux. To run newserv on Linux, you'll have to build it from source - see the section below.
+There are currently no precompiled releases for Linux. To run Hunter's Guild on Linux, you'll have to build it from source - see the section below.
 
 ### Building from source (macOS/Linux)
 
@@ -165,9 +165,9 @@ To build on macOS or Linux:
     * macOS: `brew install cmake asio libiconv`
     * Linux: `sudo apt-get install cmake libasio-dev` (or use your Linux distribution's package manager)
 2. Build and install [phosg](https://github.com/fuzziqersoftware/phosg) and [resource_dasm](https://github.com/fuzziqersoftware/resource_dasm).
-3. Run `cmake . && make` in the newserv directory.
+3. Run `cmake . && make` in the Hunter's Guild directory.
 
-After building newserv, edit system/config.example.json as needed **and rename it to system/config.json** (note that this step is not necessary for the precompiled releases), set up [client patch directories](#client-patch-directories) if you're planning to play Blue Burst, then run `./newserv` in newserv's directory.
+After building, edit system/config.example.json as needed **and rename it to system/config.json** (note that this step is not necessary for the precompiled releases). If you're planning to play Blue Burst, set up the [client patch directories](#client-patch-directories). Then run `./newserv` in the Hunter's Guild directory.
 
 The server has an interactive shell which can be used to make changes, such as managing user accounts, updating the server's configuration, managing Episode 3 tournaments, and more. Type `help` and press Enter to see all the commands.
 
@@ -177,17 +177,17 @@ To use newserv in other ways (e.g. for translating data), see the end of this do
 
 ### Building from source (Windows)
 
-The current version of newserv is cross-compiled using mingw-w64 on a macOS build machine, with the necessary libraries manually installed. Setting up such a build environment is tedious and not recommended; it's recommended to just use a release version instead.
+Hunter's Guild is currently cross-compiled using mingw-w64 on a macOS build machine, with the necessary libraries manually installed. Setting up such a build environment is tedious and not recommended; it's recommended to just use a release version instead.
 
 Here is a rough outline of the Windows build process. You should only attempt this yourself if you're familiar with setting up build environments and can deal with issues you may encounter along the way.
 1. Install recent versions of MinGW and CMake.
 2. Build and install zlib, libiconv, asio, phosg, and resource_dasm into your MinGW environment.
 3. Clone the Hunter's Guild repository with symlinks enabled: `git clone -c core.symlinks=true https://github.com/awest813/Hunter-s-Guild.git`
-4. Build newserv via CMake.
+4. Build Hunter's Guild via CMake.
 
 ## Client patch directories
 
-newserv implements a patch server for PSO PC and PSO BB game data. Any file or directory you put in the system/patch-bb or system/patch-pc directories will be synced to clients when they connect to the patch server.
+Hunter's Guild implements a patch server for PSO PC and PSO BB game data. Any file or directory you put in the system/patch-bb or system/patch-pc directories will be synced to clients when they connect to the patch server.
 
 For Blue Burst set up, the below is mandatory for a smooth experience:
 
@@ -195,11 +195,11 @@ For Blue Burst set up, the below is mandatory for a smooth experience:
 2. Copy all the `map_*.dat` files, `map_*.evt`, `unitxt_*` files, and the `data.gsl` file and place them in `system/patch-bb/data`.
 3. If you're using game files from the Tethealla client, make a copy of `unitxt_j.prs` inside system/patch-bb/data and name it `unitxt_e.prs`. (If `unitxt_e.prs` already exists, replace it with the copied file.)
 
-If you don't have a BB client, or if you're using a Tethealla client from another source, Tethealla clients that are compatible with newserv can be found here: [English](https://web.archive.org/web/20240402011115/https://ragol.org/files/bb/TethVer12513_English.zip) / [Japanese](https://web.archive.org/web/20240402013127/https://ragol.org/files/bb/TethVer12513_Japanese.zip). These clients connect to 127.0.0.1 (localhost) automatically.
+If you don't have a BB client, or if you're using a Tethealla client from another source, Tethealla clients that are compatible with Hunter's Guild can be found here: [English](https://web.archive.org/web/20240402011115/https://ragol.org/files/bb/TethVer12513_English.zip) / [Japanese](https://web.archive.org/web/20240402013127/https://ragol.org/files/bb/TethVer12513_Japanese.zip). These clients connect to 127.0.0.1 (localhost) automatically.
 
-For BB clients, newserv reads some files out of the patch data to implement game logic, so it's important that certain game files are synchronized between the server and the client. newserv contains defaults for these files in the system/maps/bb-v4 directory, but if these don't match the client's copies of the files, odd behavior will occur in games.
+For BB clients, Hunter's Guild reads some files out of the patch data to implement game logic, so it's important that certain game files are synchronized between the server and the client. Defaults for these files are in the system/maps/bb-v4 directory, but if these don't match the client's copies of the files, odd behavior will occur in games.
 
-To make server startup faster, newserv caches the modification times, sizes, and checksums of the files in the patch directories. If the patch server appears to be misbehaving, try deleting the .metadata-cache.json file in the relevant patch directory to force newserv to recompute all the checksums. Also, in the case when checksums are cached, newserv may not actually load the data for a patch file until it's needed by a client. Therefore, modifying any part of the patch tree while newserv is running can cause clients to see an inconsistent view of it.
+To make server startup faster, checksums of patch files are cached on disk. If the patch server appears to be misbehaving, try deleting the .metadata-cache.json file in the relevant patch directory to force a recompute of all checksums. When checksums are cached, the server may not actually load the data for a patch file until it's needed by a client — modifying any part of the patch tree while the server is running can cause clients to see an inconsistent view of it.
 
 Patch directory contents are cached in memory. If you've changed any of these files, you can run `reload patch-indexes` in the interactive shell to make the changes take effect without restarting the server.
 
@@ -848,7 +848,7 @@ git clone https://github.com/awest813/Hunter-s-Guild
 cd ~/Hunter-s-Guild
 ```
 
-Build newserv. This will take a while. Don't forget the period at the end!
+Build the Docker image. This will take a while. Don't forget the period at the end!
 ```
 sudo docker build -t newserv .
 ```
@@ -863,7 +863,7 @@ mkdir ~/newservPersist/licenses
 
 Copy config file to config dir
 ```
-cp ~/newserv/system/config.example.json ~/newservPersist/config.json
+cp ~/Hunter-s-Guild/system/config.example.json ~/newservPersist/config.json
 ```
 
 Edit config.json
