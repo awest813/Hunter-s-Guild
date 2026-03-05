@@ -1,8 +1,8 @@
 See ROADMAP.md for the current phased plan. The items below track known bugs and future work; they are updated as issues are opened, fixed, or become obsolete. Each item should correspond to a GitHub issue where applicable.
 
-## Phase 1 — Active priorities (see ROADMAP.md §1.1)
+## Phase 2 — Active priorities (see ROADMAP.md Current Phase)
 
-These items are directly linked to Phase 1.1 (high-impact crashes/desyncs):
+These items are currently prioritized for delivery during the active roadmap phase:
 
 - Fix enemy flag mapping in v2/v3 crossplay and test
 - Handle items in crossplay — use the replacement table

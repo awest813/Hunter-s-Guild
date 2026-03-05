@@ -15,62 +15,26 @@ Build and maintain a **stable, open-source, and sustainable** PSO server fork ba
 
 ## Current Phase
 
-### Phase 1 — Foundation and Stabilization
+### Phase 2 — Vanilla-Compatible Quality of Life
 
 **Status:** In Progress
 
-This is the active phase for the fork. Each item has a clear acceptance criterion so contributors know exactly when it is done.
-
-#### 1.1 — Triage and fix high-impact crashes/desyncs
-
-**Outcome:** Fewer production incidents and safer cross-version sessions.
+This is the active phase for the fork. Focus on opt-in improvements that preserve vanilla gameplay while improving usability and maintainability.
 
 Acceptance criteria:
-- Known crash and desync bugs are triaged in the GitHub issue tracker with reproduction steps.
-- High-impact issues (crashes, data loss, persistent desyncs) are fixed and verified before merging.
-- Fixes include a brief description of the root cause in the commit message or PR body.
+- Opt-in quality-of-life improvements are documented and shipped without changing default gameplay balance.
+- Operator-facing ergonomics or documentation improvements reduce setup/maintenance overhead.
+- Compatibility fixes remain low-risk and are validated by existing tests where feasible.
 
-#### 1.2 — Improve regression confidence with replay/smoke tests
+### Phase 1 — Foundation and Stabilization
 
-**Outcome:** Faster, safer releases with less manual validation.
+**Status:** Completed
 
-Acceptance criteria:
-- At least one reproducible smoke test or replay test exists for a previously reported crash or desync path.
-- The CI workflow runs the test suite on every PR.
-- New bug fixes are accompanied by a test where feasible.
-
-#### 1.3 — Tighten operational documentation
-
-**Outcome:** Easier onboarding and lower maintenance overhead.
-
-Acceptance criteria:
-- `README.md` is updated to reflect the fork's goals, setup steps, and correct repository URLs.
-- `ROADMAP.md` clearly describes phases, acceptance criteria, and how contributions fit in.
-- `TODO.md` is kept aligned with the GitHub issue tracker (no stale or duplicate entries).
-- Setup instructions are verified to work on a fresh Linux environment.
-
-#### 1.4 — Keep issue tracking aligned to shipped changes
-
-**Outcome:** Transparent project status for contributors and operators.
-
-Acceptance criteria:
-- Every merged fix closes or updates its corresponding GitHub issue or TODO entry.
-- Open TODO items that have shipped are removed or marked done.
-- The issue tracker reflects only active, unresolved work.
+This phase established the baseline for stability, testing confidence, and documentation alignment.
 
 ---
 
 ## Next Phases
-
-### Phase 2 — Vanilla-Compatible Quality of Life
-
-Deliver opt-in improvements that do not alter core gameplay balance:
-
-- Small usability and accessibility features.
-- Documentation and operator ergonomics improvements.
-- Additional safe proxy/server compatibility fixes.
-
-**Entry criterion:** All Phase 1 acceptance criteria are met.
 
 ### Phase 3 — Long-Term Sustainability
 
@@ -80,7 +44,7 @@ Strengthen maintainability and contributor experience:
 - Expand automated test coverage around historically fragile paths.
 - Improve internal documentation for protocol and file format behavior.
 
-**Entry criterion:** Phase 2 is substantially complete.
+**Entry criterion:** Phase 2 acceptance criteria are met.
 
 ---
 
@@ -94,7 +58,7 @@ Strengthen maintainability and contributor experience:
 
 ## How to Contribute
 
-1. Check the [issue tracker](https://github.com/awest813/Hunter-s-Guild/issues) for open Phase 1 items.
+1. Check the [issue tracker](https://github.com/awest813/Hunter-s-Guild/issues) for open items aligned with the current phase.
 2. Pick an issue, comment that you are working on it, and open a draft PR early.
 3. Keep PRs small and focused — one fix or improvement per PR.
 4. Ensure your changes don't break the CI build before requesting a review.
