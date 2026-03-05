@@ -13,8 +13,8 @@ See TODO.md for known issues and future work, or go to the GitHub issue tracker 
     * [Fork direction](#fork-direction)
     * [History](#history)
     * [Other server projects](#other-server-projects)
-    * [Using newserv in other projects](#using-newserv-in-other-projects)
-    * [Contributing to newserv](#contributing-to-newserv)
+    * [Using this project in other projects](#using-this-project-in-other-projects)
+    * [Contributing to Hunter's Guild](#contributing-to-hunters-guild)
 * [Compatibility](#compatibility)
 * Setup
     * [Server setup](#server-setup)
@@ -28,7 +28,7 @@ See TODO.md for known issues and future work, or go to the GitHub issue tracker 
     * [Server-side saves](#server-side-saves)
     * [Episode 3 features](#episode-3-features)
     * [Memory patches, client functions, and DOL files](#memory-patches-and-client-functions)
-    * [Using newserv as a proxy](#using-newserv-as-a-proxy)
+    * [Using the server as a proxy](#using-the-server-as-a-proxy)
     * [Chat commands](#chat-commands)
     * [REST API](#rest-api)
 * [Non-server features](#non-server-features)
@@ -72,19 +72,19 @@ Independently of this project, there are many other PSO servers out there. Those
 * (2015) **[Archon](https://github.com/dcrodman/archon)**: A PSOBB server written in Go by Drew Rodman.
 * (2015) **[Idola](https://github.com/HybridEidolon/idolapsoserv)**: A PSOBB server written in Rust by HybridEidolon. Functionality status unknown; the project has been archived.
 * (2017) **[Aselia](https://github.com/Solybum/Aselia)**: A PSOBB server written in C# by Soly. It seems this was planned to be open-source at some point, but that has not (yet) happened.
-* (2018) **newserv**: This project right here.
+* (2018) **[newserv](https://github.com/fuzziqersoftware/newserv)**: The upstream project that Hunter's Guild is forked from.
 * (2019) **[Mechonis](https://gitlab.com/sora3087/mechonis)**: A PSOBB server with a microservice architecture written in TypeScript by TrueVision.
 * (2020) **[Booma.Server](https://github.com/HelloKitty/Booma.Server)**: A PSOBB server written in C# by Glader, with Soly's help.
 * (2021) **[Phantasmal World](https://github.com/DaanVandenBosch/phantasmal-world)**: A set of PSO tools, including a web-based model viewer and quest builder, and a PSO server, written by Daan Vanden Bosch.
 * (2021) **[Elseware](http://git.sharnoth.com/jake/elseware)**: A PSOBB server written in Rust by Jake.
 
-## Using newserv in other projects
+## Using this project in other projects
 
-You are free to use code from newserv in your own open-source projects; the only condition is that the contents of the LICENSE file must be included in your project if you use code from newserv. Your project does not also have to use the MIT license; you can use any license you want.
+You are free to use code from this project in your own open-source projects; the only condition is that the contents of the LICENSE file must be included in your project if you use code from here. Your project does not also have to use the MIT license; you can use any license you want.
 
-If you want to use parts of newserv in your project, there are two easy ways to do so with proper licensing:
-* If you're using a lot of code from newserv, you can put a copy of newserv's LICENSE file in your repository alongside your own license file, or include the contents of newserv's license in your own license file.
-* If you're only using a few files from newserv, you can copy and paste the contents of the LICENSE file into a comment at the beginning of each copied file.
+If you want to use parts of this project in your own project, there are two easy ways to do so with proper licensing:
+* If you're using a lot of code, you can put a copy of the LICENSE file in your repository alongside your own license file, or include the contents of the license in your own license file.
+* If you're only using a few files, you can copy and paste the contents of the LICENSE file into a comment at the beginning of each copied file.
 
 Some of the more likely useful files are:
 * **src/CommandFormats.hh**: Complete listing of all network commands used in all known versions of the game, and their formats
@@ -100,17 +100,18 @@ Some of the more likely useful files are:
 * **src/Episode3/DataIndexes.hh**: Episode 3 file structures, including card definition format and map/quest format
 * **system/item-tables/names-v4.json**: Names of all items, indexed by the first 3 bytes of data1
 
-## Contributing to newserv
+## Contributing to Hunter's Guild
 
-The goals of this project are:
-* Build stable, extensible PSO server software that includes all vanilla functionality as well as optional modern conveniences, features, and cheats.
+The goals of this fork are:
+* Maintain a stable, extensible PSO server that preserves all vanilla functionality while adding optional, opt-in improvements.
+* Improve reliability, documentation, and maintainability over the long term.
 * Document the internals of PSO's network protocol, file formats, and game mechanics. This is mainly done through comments in the code.
 
-This is a personal project; there is no official development team, official website, or official instance of newserv. Issues and pull requests are certainly welcome, but please only add content (e.g. quests or patches) that you've created, is already public, or you have permission to release publicly.
+This is a community-maintained open-source project. Issues and pull requests are welcome. Please only add content (e.g. quests or patches) that you've created, is already public, or you have permission to release publicly. See ROADMAP.md for the current priorities and planned phases.
 
 # Compatibility
 
-newserv supports all known versions of PSO, including various development prototypes. This table lists all versions that newserv supports. (NTE stands for Network Trial Edition; the GameCube beta versions were called Trial Edition instead, but we use the NTE abbreviation anyway for consistency.)
+Hunter's Guild supports all known versions of PSO, including various development prototypes. This table lists all versions that the server supports. (NTE stands for Network Trial Edition; the GameCube beta versions were called Trial Edition instead, but we use the NTE abbreviation anyway for consistency.)
 
 | Version         | Lobbies  | Games    | Proxy    |
 |-----------------|----------|----------|----------|
@@ -142,11 +143,11 @@ newserv supports all known versions of PSO, including various development protot
 
 ## Server setup
 
-Currently newserv works on macOS, Windows, and Ubuntu Linux. It will likely work on other Linux flavors too.
+Hunter's Guild works on macOS, Windows, and Ubuntu Linux. It will likely work on other Linux flavors too.
 
 ### Windows/macOS
 
-1. Download the latest release.zip file from the [releases page](https://github.com/fuzziqersoftware/newserv/releases).
+1. Download the latest release.zip file from the [releases page](https://github.com/awest813/Hunter-s-Guild/releases).
 2. Extract the contents of the archive to some location on your computer.
 3. Go into the system/ folder, open config.json in a text editor, and edit it to your liking. There are comments in the file that describe what all the options do. Most of the options can be left alone if you want default behavior, but on Windows, you must change LocalAddress and ExternalAddress.
 4. (Optional) If you plan to play Blue Burst on newserv, set up the patch directory. See [client patch directories](#client-patch-directories) for details.
@@ -181,7 +182,7 @@ The current version of newserv is cross-compiled using mingw-w64 on a macOS buil
 Here is a rough outline of the Windows build process. You should only attempt this yourself if you're familiar with setting up build environments and can deal with issues you may encounter along the way.
 1. Install recent versions of MinGW and CMake.
 2. Build and install zlib, libiconv, asio, phosg, and resource_dasm into your MinGW environment.
-3. Clone the newserv repository with symlinks enabled: `git clone -c core.symlinks=true https://github.com/fuzziqersoftware/newserv.git`
+3. Clone the Hunter's Guild repository with symlinks enabled: `git clone -c core.symlinks=true https://github.com/awest813/Hunter-s-Guild.git`
 4. Build newserv via CMake.
 
 ## Client patch directories
@@ -531,7 +532,7 @@ Like other kinds of data, functions and DOL files are cached in memory. If you'v
 
 I mainly built the DOL loading functionality for documentation purposes. By now, there are many better ways to load homebrew code on an unmodified GameCube, but to my knowledge there isn't another open-source implementation of this method in existence.
 
-## Using newserv as a proxy
+## Using the server as a proxy
 
 If you want to play online on remote servers rather than running your own server, newserv also includes a PSO proxy. Currently this works with PSO GC and may work with PC and DC; it also works with some BB clients in specific situations.
 
@@ -843,8 +844,8 @@ sudo apt install -y cmake. ## minimum version is 3.10. Check installed version w
 Clone repository
 ```
 cd ~
-git clone https://github.com/fuzziqersoftware/newserv/
-cd ~/newserv
+git clone https://github.com/awest813/Hunter-s-Guild
+cd ~/Hunter-s-Guild
 ```
 
 Build newserv. This will take a while. Don't forget the period at the end!
