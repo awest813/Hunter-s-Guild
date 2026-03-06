@@ -3106,14 +3106,10 @@ void Server::unknown_802402F4() {
 }
 
 vector<shared_ptr<Card>> Server::const_cast_set_cards_v(const vector<shared_ptr<const Card>>& cards) {
-  // TODO: This is dumb. Figure out a not-dumb way to do this.
   vector<shared_ptr<Card>> ret;
-  for (auto const_card : cards) {
-    auto mutable_card = this->card_for_set_card_ref(const_card->get_card_ref());
-    if (mutable_card.get() != const_card.get()) {
-      throw logic_error("inconsistent set cards index");
-    }
-    ret.emplace_back(mutable_card);
+  ret.reserve(cards.size());
+  for (const auto& const_card : cards) {
+    ret.emplace_back(std::const_pointer_cast<Card>(const_card));
   }
   return ret;
 }
