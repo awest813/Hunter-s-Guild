@@ -461,6 +461,8 @@ string remove_color(const string& s) {
 
 string strip_color(const string& s) {
   string ret;
+  // Pre-allocate memory to prevent reallocations during string building
+  ret.reserve(s.size());
   for (size_t r = 0; r < s.size(); r++) {
     if ((s[r] == '$' || s[r] == '\t') &&
         (s[r + 1] == 'C') && (((s[r + 2] >= '0') && (s[r + 2] <= '9')) || (s[r + 2] == 'G') || (s[r + 2] == 'a'))) {
