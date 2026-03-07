@@ -3317,6 +3317,54 @@ static asio::awaitable<void> on_13_A7_V3_V4(shared_ptr<Client> c, Channel::Messa
   }
 }
 
+static void import_auto_reply_utf16(
+    shared_ptr<Client> c,
+    shared_ptr<PSOBBCharacterFile> player,
+    bool enabled,
+    const string& msg_data,
+    size_t offset,
+    size_t max_length = string::npos) {
+  if (enabled) {
+    string auto_reply = msg_data.substr(offset, max_length);
+    phosg::strip_trailing_zeroes(auto_reply);
+    if (auto_reply.size() & 1) {
+      auto_reply.push_back(0);
+    }
+    try {
+      player->auto_reply.encode(tt_utf16_to_utf8(auto_reply), player->inventory.language);
+    } catch (const runtime_error& e) {
+      c->log.warning_f("Failed to decode auto-reply message: {}", e.what());
+    }
+    c->login->account->auto_reply_message = std::move(auto_reply);
+  } else {
+    player->auto_reply.clear();
+    c->login->account->auto_reply_message.clear();
+  }
+}
+
+static void import_auto_reply_marked(
+    shared_ptr<Client> c,
+    shared_ptr<PSOBBCharacterFile> player,
+    bool enabled,
+    const string& msg_data,
+    size_t offset,
+    size_t max_length = string::npos) {
+  if (enabled) {
+    string auto_reply = msg_data.substr(offset, max_length);
+    phosg::strip_trailing_zeroes(auto_reply);
+    try {
+      string encoded = tt_decode_marked(auto_reply, player->inventory.language, false);
+      player->auto_reply.encode(encoded, player->inventory.language);
+    } catch (const runtime_error& e) {
+      c->log.warning_f("Failed to decode auto-reply message: {}", e.what());
+    }
+    c->login->account->auto_reply_message = std::move(auto_reply);
+  } else {
+    player->auto_reply.clear();
+    c->login->account->auto_reply_message.clear();
+  }
+}
+
 static asio::awaitable<void> on_61_98(shared_ptr<Client> c, Channel::Message& msg) {
   auto s = c->require_server_state();
 
@@ -3373,22 +3421,7 @@ static asio::awaitable<void> on_61_98(shared_ptr<Client> c, Channel::Message& ms
       player->challenge_records = cmd.records.challenge;
       player->choice_search_config = cmd.choice_search_config;
       c->import_blocked_senders(cmd.blocked_senders);
-      if (cmd.auto_reply_enabled) {
-        string auto_reply = msg.data.substr(sizeof(cmd));
-        phosg::strip_trailing_zeroes(auto_reply);
-        if (auto_reply.size() & 1) {
-          auto_reply.push_back(0);
-        }
-        try {
-          player->auto_reply.encode(tt_utf16_to_utf8(auto_reply), player->inventory.language);
-        } catch (const runtime_error& e) {
-          c->log.warning_f("Failed to decode auto-reply message: {}", e.what());
-        }
-        c->login->account->auto_reply_message = auto_reply;
-      } else {
-        player->auto_reply.clear();
-        c->login->account->auto_reply_message.clear();
-      }
+      import_auto_reply_utf16(c, player, cmd.auto_reply_enabled, msg.data, sizeof(cmd));
       c->login->account->last_player_name = player->disp.name.decode(player->inventory.language);
       break;
     }
@@ -3403,20 +3436,7 @@ static asio::awaitable<void> on_61_98(shared_ptr<Client> c, Channel::Message& ms
       player->challenge_records = cmd.records.challenge;
       player->choice_search_config = cmd.choice_search_config;
       c->import_blocked_senders(cmd.blocked_senders);
-      if (cmd.auto_reply_enabled) {
-        string auto_reply = msg.data.substr(sizeof(cmd), 0xAC);
-        phosg::strip_trailing_zeroes(auto_reply);
-        try {
-          string encoded = tt_decode_marked(auto_reply, player->inventory.language, false);
-          player->auto_reply.encode(encoded, player->inventory.language);
-        } catch (const runtime_error& e) {
-          c->log.warning_f("Failed to decode auto-reply message: {}", e.what());
-        }
-        c->login->account->auto_reply_message = auto_reply;
-      } else {
-        player->auto_reply.clear();
-        c->login->account->auto_reply_message.clear();
-      }
+      import_auto_reply_marked(c, player, cmd.auto_reply_enabled, msg.data, sizeof(cmd), 0xAC);
       c->login->account->last_player_name = player->disp.name.decode(player->inventory.language);
       break;
     }
@@ -3462,20 +3482,7 @@ static asio::awaitable<void> on_61_98(shared_ptr<Client> c, Channel::Message& ms
       player->choice_search_config = cmd->choice_search_config;
       player->info_board.encode(cmd->info_board.decode(player->inventory.language), player->inventory.language);
       c->import_blocked_senders(cmd->blocked_senders);
-      if (cmd->auto_reply_enabled) {
-        string auto_reply = msg.data.substr(sizeof(cmd), 0xAC);
-        phosg::strip_trailing_zeroes(auto_reply);
-        try {
-          string encoded = tt_decode_marked(auto_reply, player->inventory.language, false);
-          player->auto_reply.encode(encoded, player->inventory.language);
-        } catch (const runtime_error& e) {
-          c->log.warning_f("Failed to decode auto-reply message: {}", e.what());
-        }
-        c->login->account->auto_reply_message = auto_reply;
-      } else {
-        player->auto_reply.clear();
-        c->login->account->auto_reply_message.clear();
-      }
+      import_auto_reply_marked(c, player, cmd->auto_reply_enabled, msg.data, sizeof(*cmd), 0xAC);
       c->login->account->last_player_name = player->disp.name.decode(player->inventory.language);
       break;
     }
@@ -3488,22 +3495,7 @@ static asio::awaitable<void> on_61_98(shared_ptr<Client> c, Channel::Message& ms
       player->choice_search_config = cmd.choice_search_config;
       player->info_board = cmd.info_board;
       c->import_blocked_senders(cmd.blocked_senders);
-      if (cmd.auto_reply_enabled) {
-        string auto_reply = msg.data.substr(sizeof(cmd), 0xAC);
-        phosg::strip_trailing_zeroes(auto_reply);
-        if (auto_reply.size() & 1) {
-          auto_reply.push_back(0);
-        }
-        try {
-          player->auto_reply.encode(tt_utf16_to_utf8(auto_reply), player->inventory.language);
-        } catch (const runtime_error& e) {
-          c->log.warning_f("Failed to decode auto-reply message: {}", e.what());
-        }
-        c->login->account->auto_reply_message = auto_reply;
-      } else {
-        player->auto_reply.clear();
-        c->login->account->auto_reply_message.clear();
-      }
+      import_auto_reply_utf16(c, player, cmd.auto_reply_enabled, msg.data, sizeof(cmd), 0xAC);
       c->login->account->last_player_name = player->disp.name.decode(player->inventory.language);
       break;
     }
