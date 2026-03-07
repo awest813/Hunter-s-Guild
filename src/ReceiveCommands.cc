@@ -3335,7 +3335,7 @@ static void import_auto_reply_utf16(
     } catch (const runtime_error& e) {
       c->log.warning_f("Failed to decode auto-reply message: {}", e.what());
     }
-    c->login->account->auto_reply_message = move(auto_reply);
+    c->login->account->auto_reply_message = std::move(auto_reply);
   } else {
     player->auto_reply.clear();
     c->login->account->auto_reply_message.clear();
@@ -3358,7 +3358,7 @@ static void import_auto_reply_marked(
     } catch (const runtime_error& e) {
       c->log.warning_f("Failed to decode auto-reply message: {}", e.what());
     }
-    c->login->account->auto_reply_message = move(auto_reply);
+    c->login->account->auto_reply_message = std::move(auto_reply);
   } else {
     player->auto_reply.clear();
     c->login->account->auto_reply_message.clear();
