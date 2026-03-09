@@ -1354,16 +1354,7 @@ void Server::set_client_id_ready_to_advance_phase(uint8_t client_id, BattlePhase
           ps->assist_flags |= AssistFlag::ELIGIBLE_FOR_DICE_BOOST;
         }
       } else {
-        // TODO: It'd be nice to do this in a constant-randomness way, but I'm lazy, and this matches Sega's original
-        // implementation. The less-lazy way to do it would be to roll three dice: one in the range [1, 2] to decide
-        // which of ATK or DEF will be boosted, then roll the ATK die in range [1, N] (or [3, N] if it's boosted), and
-        // do the same for the DEF die.
-        for (size_t z = 0; z < 200; z++) {
-          ps->roll_main_dice_or_apply_after_effects();
-          if ((ps->get_atk_points() >= 3) || (ps->get_def_points() >= 3)) {
-            break;
-          }
-        }
+        ps->roll_main_dice_or_apply_after_effects(true);
         ps->assist_flags &= (~AssistFlag::ELIGIBLE_FOR_DICE_BOOST);
       }
       ps->update_hand_and_equip_state_and_send_6xB4x02_if_needed();

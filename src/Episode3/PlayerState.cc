@@ -1937,7 +1937,7 @@ void PlayerState::apply_main_die_assist_effects(uint8_t* die_value) const {
   }
 }
 
-void PlayerState::roll_main_dice_or_apply_after_effects() {
+void PlayerState::roll_main_dice_or_apply_after_effects(bool is_dice_boost) {
   auto s = this->server();
   const auto& rules = s->map_and_rules->rules;
 
@@ -1950,6 +1950,22 @@ void PlayerState::roll_main_dice_or_apply_after_effects() {
 
   auto atk_range = rules.atk_dice_range(is_1p_2v1);
   auto def_range = rules.def_dice_range(is_1p_2v1);
+
+  if (is_dice_boost) {
+    bool atk_can_boost = (atk_range.second >= 3);
+    bool def_can_boost = (def_range.second >= 3);
+    if (atk_can_boost && def_can_boost) {
+      if (s->get_random(2) == 0) {
+        atk_range.first = max<uint8_t>(atk_range.first, 3);
+      } else {
+        def_range.first = max<uint8_t>(def_range.first, 3);
+      }
+    } else if (atk_can_boost) {
+      atk_range.first = max<uint8_t>(atk_range.first, 3);
+    } else if (def_can_boost) {
+      def_range.first = max<uint8_t>(def_range.first, 3);
+    }
+  }
 
   uint8_t atk_dice_range_width = (atk_range.second - atk_range.first) + 1;
   if (atk_dice_range_width < 2) {
