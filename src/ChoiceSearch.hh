@@ -21,9 +21,11 @@ struct ChoiceSearchConfigT {
   parray<Entry, 5> entries;
 
   int32_t get_setting(uint16_t parent_choice_id) const {
-    for (size_t z = 0; z < this->entries.size(); z++) {
-      if (this->entries[z].parent_choice_id == parent_choice_id) {
-        return this->entries[z].choice_id;
+    size_t entries_size = this->entries.size();
+    for (size_t z = 0; z < entries_size; z++) {
+      const auto& entry = this->entries[z];
+      if (entry.parent_choice_id == parent_choice_id) {
+        return entry.choice_id;
       }
     }
     return -1;
@@ -32,7 +34,8 @@ struct ChoiceSearchConfigT {
   operator ChoiceSearchConfigT<!BE>() const {
     ChoiceSearchConfigT<!BE> ret;
     ret.disabled = this->disabled;
-    for (size_t z = 0; z < this->entries.size(); z++) {
+    size_t entries_size = this->entries.size();
+    for (size_t z = 0; z < entries_size; z++) {
       auto& ret_e = ret.entries[z];
       const auto& this_e = this->entries[z];
       ret_e.parent_choice_id = this_e.parent_choice_id;
