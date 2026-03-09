@@ -650,9 +650,24 @@ void Tournament::start() {
     }
     // If we allow all-COM teams, or this is a 2v2 tournament and the team has only one human on it, add a COM
     if (has_com_teams || !t->players.empty()) {
-      // TODO: Don't allow duplicate COM decks, nor duplicate COM SCs on the same team
-      while (t->players.size() < t->max_players) {
-        t->players.emplace_back(this->com_deck_index->random_deck());
+      size_t attempts = 0;
+      while (t->players.size() < t->max_players && attempts < 100) {
+        auto deck = this->com_deck_index->random_deck();
+        bool duplicate = false;
+        for (const auto& player : t->players) {
+          if (player.is_com() && (player.com_deck == deck || player.com_deck->card_ids[0] == deck->card_ids[0])) {
+            duplicate = true;
+            break;
+          }
+        }
+        if (!duplicate) {
+          t->players.emplace_back(deck);
+        } else {
+          attempts++;
+        }
+      }
+      if (t->players.size() < t->max_players) {
+        throw runtime_error("could not find enough unique COM decks to complete team");
       }
     }
   }
