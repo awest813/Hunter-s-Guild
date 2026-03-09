@@ -602,8 +602,8 @@ void Server::force_destroy_field_character(uint8_t client_id, size_t visible_ind
     throw runtime_error("player does not exist");
   }
 
-  // TODO: Is it possible for there to be gaps in the set cards array? If not, we could just do a direct array lookup
-  // here instead of this loop
+  // Note: There can be gaps in the set cards array (e.g. on NTE where cards are destroyed immediately),
+  // so we must iterate and skip null pointers rather than doing a direct array lookup.
   shared_ptr<Card> set_card = nullptr;
   for (size_t set_index = 0; set_index < 8; set_index++) {
     if (!ps->set_cards[set_index]) {
