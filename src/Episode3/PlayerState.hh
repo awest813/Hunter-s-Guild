@@ -132,7 +132,7 @@ public:
   void dice_phase_before();
   void handle_homesick_assist_effect_from_bomb(std::shared_ptr<Card> card);
   void apply_main_die_assist_effects(uint8_t* die_value) const;
-  void roll_main_dice_or_apply_after_effects();
+  void roll_main_dice_or_apply_after_effects(bool is_dice_boost = false);
   void unknown_8023C110();
   void compute_team_dice_bonus_after_draw_phase();
   void send_6xB4x0A_for_set_card(size_t set_index);
