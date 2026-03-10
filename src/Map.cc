@@ -5087,31 +5087,6 @@ vector<EditAction> compute_edit_path(
     inline const Entry& at(size_t x, size_t y) const {
       return const_cast<Matrix*>(this)->at(x, y);
     }
-
-    void print(FILE* stream) const {
-      for (size_t y = 0; y < this->entries.size() / this->width; y++) {
-        for (size_t x = 0; x < this->width; x++) {
-          const auto& entry = this->at(x, y);
-          char action_ch = '?';
-          switch (entry.action) {
-            case EditAction::STOP:
-              action_ch = 'S';
-              break;
-            case EditAction::ADD:
-              action_ch = 'A';
-              break;
-            case EditAction::EDIT:
-              action_ch = 'E';
-              break;
-            case EditAction::DELETE:
-              action_ch = 'D';
-              break;
-          }
-          phosg::fwrite_fmt(stream, "  {} {:03.2g}", action_ch, entry.cost);
-        }
-        fputc('\n', stream);
-      }
-    }
   };
 
   Matrix mtx(curr_count + 1, prev_count + 1);
@@ -5165,7 +5140,6 @@ vector<EditAction> compute_edit_path(
     reverse_path.emplace_back(action);
     switch (action) {
       case EditAction::STOP:
-        mtx.print(stderr); // TODO: delete this when no longer needed
         throw logic_error("STOP action left after edit distance computation");
       case EditAction::ADD:
         x--;
