@@ -21,9 +21,7 @@ struct ChoiceSearchConfigT {
   parray<Entry, 5> entries;
 
   int32_t get_setting(uint16_t parent_choice_id) const {
-    size_t entries_size = this->entries.size();
-    for (size_t z = 0; z < entries_size; z++) {
-      const auto& entry = this->entries[z];
+    for (const auto& entry : this->entries) {
       if (entry.parent_choice_id == parent_choice_id) {
         return entry.choice_id;
       }
