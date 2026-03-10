@@ -147,6 +147,18 @@ struct parray {
   ItemT* data() {
     return this->items;
   }
+  ItemT* begin() {
+    return this->items;
+  }
+  const ItemT* begin() const {
+    return this->items;
+  }
+  ItemT* end() {
+    return this->items + Count;
+  }
+  const ItemT* end() const {
+    return this->items + Count;
+  }
   const ItemT* data() const {
     return this->items;
   }
