@@ -1,5 +1,6 @@
 #include "ShellCommands.hh"
 
+#include <format>
 #include <stdio.h>
 #include <string.h>
 
@@ -119,9 +120,7 @@ ShellCommand c_help(
       deque<string> ret({"Commands:"});
       for (const auto& def : ShellCommand::commands_by_order) {
         if (def->help_text) {
-          // TODO: It's not great that we copy the text here.
-          auto& s = ret.emplace_back("  ");
-          s += def->help_text;
+          ret.emplace_back(std::format("  {}", def->help_text));
         }
       }
       co_return ret;
